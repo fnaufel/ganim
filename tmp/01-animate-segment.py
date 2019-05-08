@@ -3,23 +3,23 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 import ganim as ga
-from matplotlib.animation import FuncAnimation
 
 print('Successfully imported', ga.name)
 
 ga.set_up_style()
 
-fig, ax = ga.create_figure()
+fig, ax = ga.create_scene()
 
-f = ga.animate_segment(ax, (.2, .3), (.49, .49), 100)
-
-anim = FuncAnimation(
+scene = ga.render_scene(
         fig,
-        f,
-        frames=100,
-        interval=25
+        ga.animate_segment(
+                ax,
+                (.2, .3),
+                (.49, -.49),
+                100,
+                color='r'
+        )
 )
 
 #anim.save('segment.mp4')
-
 plt.show()
