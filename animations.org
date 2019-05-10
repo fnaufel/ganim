@@ -1,0 +1,822 @@
+
+* Specs
+
+*** Script manager function for a scene
+
+    + SceneManager
+
+    + The function to manage the scene will receive a table of the
+      form
+
+      | Duration (secs) | Functions (f), argdicts (ad)                   |
+      |-----------------+------------------------------------------------|
+      | d               | [(f1, ad1), (f2, ad2), ..., (fn, adn)]         |
+      | d'              | [(f'1, ad'1), (f'2, ad'2), ..., (f'n', ad'n')] |
+      | .               | .                                              |
+      | .               | .                                              |
+      | .               | .                                              |
+      |-----------------+------------------------------------------------|
+
+      where
+
+      - ad stands for "argument dict".
+
+      - The entire scene is drawn on the same figure.
+
+      - Each line of the table is a *segment* of the scene.
+
+      - Segments are executed one after the other.
+
+      - Given the desired value of frames per second, the number of
+        frames necessary for each segment is computed by the manager.
+
+      - In each segment, all animations specified by functions f1,
+        ..., fn are executed concurrently; i.e., in each frame of
+        the segment, all functions are executed.
+
+      - To avoid the need for all functions to start execution at
+        the beginning of the segment and end execution at the end of
+        the segment, each function may receive an argument
+        *predelay*, specifying how many seconds to wait before
+        start.
+
+      - Alternatively, a function may receive a boolean argument
+        *wait_for* to control at which frame it should start
+        executing. This would allow the programmer to specify that
+        one part of the animation must end before another part
+        starts.
+
+*** Animation functions or classes?
+
+    + Maybe each animation function will actually be a class (with a
+      __call__ method?).
+
+    + Each call would have only arguments that change at each frame.
+
+    + This will allow each instance to maintain its state.
+
+    + This will prevent repetition of code, where all common
+      arguments would have to be included in the signature of each
+      animation function.
+
+    + If classes are used, all common arguments will be specified
+      only once, in the base class (DoAnimationAction).
+
+    + Individual derived classes will be named DoLineSegment,
+      DoVector, DoText, etc.
+
+*** Individual animation functions (or AnimationAction derived classes)
+
+***** DoLineSegment
+
+******* Description
+
+        + Draw a line segment.
+
+******* Args
+
+********* ax
+
+          + Axes instance where to draw.
+
+          + Some figures may have more than one Axes object
+            (subplots).
+
+********* point_a
+
+          + Starting point.
+
+********* point_b
+
+          + Ending point.
+
+********* n_frames
+
+            + Number of frames the animation should take.
+
+            + This value will be calculated by [[*Script function for a
+               scene][the script function]], 
+              based on the number of seconds alotted in the table for
+              the scene and on the predelay argument.
+              
+            + If argument wait_for is given, this value will have to
+              be calculated on the fly.
+
+********* effect='grow'
+
+********* color='w'
+
+********* linewidth='1.0'
+
+*** Args common to all animation functions
+
+***** predelay=0
+
+      + How many seconds to wait before execution start.
+
+      + Note that this may cause a problem: if execution of a given
+        function starts too late, it may not complete before the end
+        of the segment. Emit warning in this case. 
+
+***** wait_for=TRUE
+
+      + A boolean flag. The function must wait for it to become true
+        before it starts executing. 
+
+***** total_number_of_frames
+
+      + Total number of frames for the segment, calculated by the
+        script function.
+
+***** current_frame_number
+
+      + Number of the current frame, calculated by the script
+        function.
+
+      + Using this value, the animation function will be able to
+        calculate how many frames are left in the segment and act
+        accordingly (e.g., in the case where the wait_for argument
+        has been used).
+
+* Example scenes
+
+*** Vector projection
+
+***** Storyboard
+
+[[./examples/projection-storyboard.jpg]]
+
+***** Script
+
+******* Segment 1
+
+********* Duration = 3
+
+********* Function = animateVector
+
+*********** ArgDict
+
+            + point_a = (0, 0)
+
+            + point_b = (3, 3)
+
+            + effect = 'grow'
+
+******* Segment 2
+
+********* Duration = 1
+
+********* Function = animateSegment
+
+*********** ArgDict
+
+            + point_a = (3, 3)
+
+            + point_b = (3, 0)
+
+            + linestyle = 'dotted'
+
+            + effect = 'grow'
+
+******* Segment 3
+
+********* Duration = 1
+
+********* Function = animateVector
+
+*********** ArgDict
+
+            + point_a = (0, 0)
+
+            + point_b = (3, 0)
+
+            + effect = 'jump'
+
+********* Segment 4
+
+*********** Duration = 1
+
+*********** Function = animateAngle
+
+************* ArgDict
+
+              + corner = (0, 0)
+
+              + radius = .5
+
+              + leg1 = (1, 0)
+
+              + leg2 = (1, 1)
+
+              + effect = 'jump'
+
+              + label = '\theta'
+
+********* Segment 5
+
+*********** Duration = 1
+
+*********** Function = animateText
+
+************* ArgDict
+
+              + text = '$10$'
+
+              + location = (1.5, ??)
+
+              + effect = 'jump'
+
+*********** Function = animateText
+
+************* ArgDict
+
+              + text = '$10 \cos \theta$'
+
+              + location = (1, -1)
+
+              + effect = 'jump'
+
+* Video configs for YT
+
+*** Recommended
+
+    + Video res: 1280x720
+
+    + Video codec: H.264
+
+    + 24 or 25fps progressive
+
+    + Video bitrate: around 40Mbps
+
+    + Audio codec: AAC
+
+    + Audio bitrate: 128 kbps or better
+
+*** Used
+
+    + 'figure.figsize': [12.8, 7.15]
+
+    + 'savefig.dpi': 200
+
+    + This gives me
+
+      - 2560x1440
+
+      - Video bitrate 36Kb/s
+
+* Setting up
+
+*** Fonts
+
+    + Use fontdict argument instead of rcparams to set the fonts
+
+    + See matplotlib 3.0 cookbook, "embedding text and expressions"
+
+* Animation references
+
+*** https://brushingupscience.com/2016/06/21/matplotlib-animations-the-easy-way/
+
+*** [[/home/BooksAndArticles/Calibre/Benjamin V. Root/Interactive Applications Using Matplotlib (849)/Interactive Applications Using Matplotlib - Benjamin V. Root.pdf]]
+
+* Default matplotlib params
+
+RcParams({'_internal.classic_mode': False,
+          'agg.path.chunksize': 0,
+          'animation.avconv_args': [],
+          'animation.avconv_path': 'avconv',
+          'animation.bitrate': -1,
+          'animation.codec': 'h264',
+          'animation.convert_args': [],
+          'animation.convert_path': 'convert',
+          'animation.embed_limit': 20.0,
+          'animation.ffmpeg_args': [],
+          'animation.ffmpeg_path': 'ffmpeg',
+          'animation.frame_format': 'png',
+          'animation.html': 'none',
+          'animation.html_args': [],
+          'animation.writer': 'ffmpeg',
+          'axes.autolimit_mode': 'data',
+          'axes.axisbelow': True,
+          'axes.edgecolor': 'white',
+          'axes.facecolor': '#EAEAF2',
+          'axes.formatter.limits': [-7, 7],
+          'axes.formatter.min_exponent': 0,
+          'axes.formatter.offset_threshold': 4,
+          'axes.formatter.use_locale': False,
+          'axes.formatter.use_mathtext': False,
+          'axes.formatter.useoffset': True,
+          'axes.grid': True,
+          'axes.grid.axis': 'both',
+          'axes.grid.which': 'major',
+          'axes.labelcolor': '.15',
+          'axes.labelpad': 4.0,
+          'axes.labelsize': 'medium',
+          'axes.labelweight': 'normal',
+          'axes.linewidth': 0.0,
+          'axes.prop_cycle': cycler('color', ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf']),
+          'axes.spines.bottom': True,
+          'axes.spines.left': True,
+          'axes.spines.right': True,
+          'axes.spines.top': True,
+          'axes.titlepad': 6.0,
+          'axes.titlesize': 'large',
+          'axes.titleweight': 'normal',
+          'axes.unicode_minus': True,
+          'axes.xmargin': 0.05,
+          'axes.ymargin': 0.05,
+          'axes3d.grid': True,
+          'backend': 'module://ipykernel.pylab.backend_inline',
+          'backend.qt4': None,
+          'backend.qt5': None,
+          'backend_fallback': True,
+          'boxplot.bootstrap': None,
+          'boxplot.boxprops.color': 'black',
+          'boxplot.boxprops.linestyle': '-',
+          'boxplot.boxprops.linewidth': 1.0,
+          'boxplot.capprops.color': 'black',
+          'boxplot.capprops.linestyle': '-',
+          'boxplot.capprops.linewidth': 1.0,
+          'boxplot.flierprops.color': 'black',
+          'boxplot.flierprops.linestyle': 'none',
+          'boxplot.flierprops.linewidth': 1.0,
+          'boxplot.flierprops.marker': 'o',
+          'boxplot.flierprops.markeredgecolor': 'black',
+          'boxplot.flierprops.markerfacecolor': 'none',
+          'boxplot.flierprops.markersize': 6.0,
+          'boxplot.meanline': False,
+          'boxplot.meanprops.color': 'C2',
+          'boxplot.meanprops.linestyle': '--',
+          'boxplot.meanprops.linewidth': 1.0,
+          'boxplot.meanprops.marker': '^',
+          'boxplot.meanprops.markeredgecolor': 'C2',
+          'boxplot.meanprops.markerfacecolor': 'C2',
+          'boxplot.meanprops.markersize': 6.0,
+          'boxplot.medianprops.color': 'C1',
+          'boxplot.medianprops.linestyle': '-',
+          'boxplot.medianprops.linewidth': 1.0,
+          'boxplot.notch': False,
+          'boxplot.patchartist': False,
+          'boxplot.showbox': True,
+          'boxplot.showcaps': True,
+          'boxplot.showfliers': True,
+          'boxplot.showmeans': False,
+          'boxplot.vertical': True,
+          'boxplot.whiskerprops.color': 'black',
+          'boxplot.whiskerprops.linestyle': '-',
+          'boxplot.whiskerprops.linewidth': 1.0,
+          'boxplot.whiskers': 1.5,
+          'contour.corner_mask': True,
+          'contour.negative_linestyle': 'dashed',
+          'datapath': '/home/fnaufel/anaconda3/lib/python3.6/site-packages/matplotlib/mpl-data',
+          'date.autoformatter.day': '%Y-%m-%d',
+          'date.autoformatter.hour': '%m-%d %H',
+          'date.autoformatter.microsecond': '%M:%S.%f',
+          'date.autoformatter.minute': '%d %H:%M',
+          'date.autoformatter.month': '%Y-%m',
+          'date.autoformatter.second': '%H:%M:%S',
+          'date.autoformatter.year': '%Y',
+          'docstring.hardcopy': False,
+          'errorbar.capsize': 0.0,
+          'examples.directory': '',
+          'figure.autolayout': False,
+          'figure.constrained_layout.h_pad': 0.04167,
+          'figure.constrained_layout.hspace': 0.02,
+          'figure.constrained_layout.use': False,
+          'figure.constrained_layout.w_pad': 0.04167,
+          'figure.constrained_layout.wspace': 0.02,
+          'figure.dpi': 72.0,
+          'figure.edgecolor': (1, 1, 1, 0),
+          'figure.facecolor': 'white',
+          'figure.figsize': [6.0, 4.0],
+          'figure.frameon': True,
+          'figure.max_open_warning': 20,
+          'figure.subplot.bottom': 0.125,
+          'figure.subplot.hspace': 0.2,
+          'figure.subplot.left': 0.125,
+          'figure.subplot.right': 0.9,
+          'figure.subplot.top': 0.88,
+          'figure.subplot.wspace': 0.2,
+          'figure.titlesize': 'large',
+          'figure.titleweight': 'normal',
+          'font.cursive': ['Apple Chancery',
+                           'Textile',
+                           'Zapf Chancery',
+                           'Sand',
+                           'Script MT',
+                           'Felipa',
+                           'cursive'],
+          'font.family': ['sans-serif'],
+          'font.fantasy': ['Comic Sans MS',
+                           'Chicago',
+                           'Charcoal',
+                           'Impact',
+                           'Western',
+                           'Humor Sans',
+                           'xkcd',
+                           'fantasy'],
+          'font.monospace': ['DejaVu Sans Mono',
+                             'Bitstream Vera Sans Mono',
+                             'Computer Modern Typewriter',
+                             'Andale Mono',
+                             'Nimbus Mono L',
+                             'Courier New',
+                             'Courier',
+                             'Fixed',
+                             'Terminal',
+                             'monospace'],
+          'font.sans-serif': ['Arial',
+                              'Liberation Sans',
+                              'DejaVu Sans',
+                              'Bitstream Vera Sans',
+                              'sans-serif'],
+          'font.serif': ['DejaVu Serif',
+                         'Bitstream Vera Serif',
+                         'Computer Modern Roman',
+                         'New Century Schoolbook',
+                         'Century Schoolbook L',
+                         'Utopia',
+                         'ITC Bookman',
+                         'Bookman',
+                         'Nimbus Roman No9 L',
+                         'Times New Roman',
+                         'Times',
+                         'Palatino',
+                         'Charter',
+                         'serif'],
+          'font.size': 10.0,
+          'font.stretch': 'normal',
+          'font.style': 'normal',
+          'font.variant': 'normal',
+          'font.weight': 'normal',
+          'grid.alpha': 1.0,
+          'grid.color': 'white',
+          'grid.linestyle': '-',
+          'grid.linewidth': 0.8,
+          'hatch.color': 'black',
+          'hatch.linewidth': 1.0,
+          'hist.bins': 10,
+          'image.aspect': 'equal',
+          'image.cmap': 'Greys',
+          'image.composite_image': True,
+          'image.interpolation': 'nearest',
+          'image.lut': 256,
+          'image.origin': 'upper',
+          'image.resample': True,
+          'interactive': True,
+          'keymap.all_axes': ['a'],
+          'keymap.back': ['left', 'c', 'backspace'],
+          'keymap.copy': ['ctrl+c', 'cmd+c'],
+          'keymap.forward': ['right', 'v'],
+          'keymap.fullscreen': ['f', 'ctrl+f'],
+          'keymap.grid': ['g'],
+          'keymap.grid_minor': ['G'],
+          'keymap.help': ['f1'],
+          'keymap.home': ['h', 'r', 'home'],
+          'keymap.pan': ['p'],
+          'keymap.quit': ['ctrl+w', 'cmd+w', 'q'],
+          'keymap.quit_all': ['W', 'cmd+W', 'Q'],
+          'keymap.save': ['s', 'ctrl+s'],
+          'keymap.xscale': ['k', 'L'],
+          'keymap.yscale': ['l'],
+          'keymap.zoom': ['o'],
+          'legend.borderaxespad': 0.5,
+          'legend.borderpad': 0.4,
+          'legend.columnspacing': 2.0,
+          'legend.edgecolor': '0.8',
+          'legend.facecolor': 'inherit',
+          'legend.fancybox': True,
+          'legend.fontsize': 'medium',
+          'legend.framealpha': 0.8,
+          'legend.frameon': False,
+          'legend.handleheight': 0.7,
+          'legend.handlelength': 2.0,
+          'legend.handletextpad': 0.8,
+          'legend.labelspacing': 0.5,
+          'legend.loc': 'best',
+          'legend.markerscale': 1.0,
+          'legend.numpoints': 1,
+          'legend.scatterpoints': 1,
+          'legend.shadow': False,
+          'legend.title_fontsize': None,
+          'lines.antialiased': True,
+          'lines.color': 'C0',
+          'lines.dash_capstyle': 'butt',
+          'lines.dash_joinstyle': 'round',
+          'lines.dashdot_pattern': [6.4, 1.6, 1.0, 1.6],
+          'lines.dashed_pattern': [3.7, 1.6],
+          'lines.dotted_pattern': [1.0, 1.65],
+          'lines.linestyle': '-',
+          'lines.linewidth': 1.5,
+          'lines.marker': 'None',
+          'lines.markeredgecolor': 'auto',
+          'lines.markeredgewidth': 1.0,
+          'lines.markerfacecolor': 'auto',
+          'lines.markersize': 6.0,
+          'lines.scale_dashes': True,
+          'lines.solid_capstyle': 'round',
+          'lines.solid_joinstyle': 'round',
+          'markers.fillstyle': 'full',
+          'mathtext.bf': 'sans:bold',
+          'mathtext.cal': 'cursive',
+          'mathtext.default': 'it',
+          'mathtext.fallback_to_cm': True,
+          'mathtext.fontset': 'dejavusans',
+          'mathtext.it': 'sans:italic',
+          'mathtext.rm': 'sans',
+          'mathtext.sf': 'sans',
+          'mathtext.tt': 'monospace',
+          'patch.antialiased': True,
+          'patch.edgecolor': 'black',
+          'patch.facecolor': 'C0',
+          'patch.force_edgecolor': False,
+          'patch.linewidth': 1.0,
+          'path.effects': [],
+          'path.simplify': True,
+          'path.simplify_threshold': 0.1111111111111111,
+          'path.sketch': None,
+          'path.snap': True,
+          'pdf.compression': 6,
+          'pdf.fonttype': 3,
+          'pdf.inheritcolor': False,
+          'pdf.use14corefonts': False,
+          'pgf.preamble': [],
+          'pgf.rcfonts': True,
+          'pgf.texsystem': 'xelatex',
+          'polaraxes.grid': True,
+          'ps.distiller.res': 6000,
+          'ps.fonttype': 3,
+          'ps.papersize': 'letter',
+          'ps.useafm': False,
+          'ps.usedistiller': False,
+          'savefig.bbox': None,
+          'savefig.directory': '~',
+          'savefig.dpi': 'figure',
+          'savefig.edgecolor': 'white',
+          'savefig.facecolor': 'white',
+          'savefig.format': 'png',
+          'savefig.frameon': True,
+          'savefig.jpeg_quality': 95,
+          'savefig.orientation': 'portrait',
+          'savefig.pad_inches': 0.1,
+          'savefig.transparent': False,
+          'scatter.marker': 'o',
+          'svg.fonttype': 'path',
+          'svg.hashsalt': None,
+          'svg.image_inline': True,
+          'text.antialiased': True,
+          'text.color': '.15',
+          'text.hinting': 'auto',
+          'text.hinting_factor': 8,
+          'text.latex.preamble': [],
+          'text.latex.preview': False,
+          'text.latex.unicode': True,
+          'text.usetex': False,
+          'timezone': 'UTC',
+          'tk.window_focus': False,
+          'toolbar': 'toolbar2',
+          'verbose.fileo': 'sys.stdout',
+          'verbose.level': 'silent',
+          'webagg.address': '127.0.0.1',
+          'webagg.open_in_browser': True,
+          'webagg.port': 8988,
+          'webagg.port_retries': 50,
+          'xtick.alignment': 'center',
+          'xtick.bottom': True,
+          'xtick.color': '.15',
+          'xtick.direction': 'out',
+          'xtick.labelbottom': True,
+          'xtick.labelsize': 'medium',
+          'xtick.labeltop': False,
+          'xtick.major.bottom': True,
+          'xtick.major.pad': 3.5,
+          'xtick.major.size': 0.0,
+          'xtick.major.top': True,
+          'xtick.major.width': 0.8,
+          'xtick.minor.bottom': True,
+          'xtick.minor.pad': 3.4,
+          'xtick.minor.size': 0.0,
+          'xtick.minor.top': True,
+          'xtick.minor.visible': False,
+          'xtick.minor.width': 0.6,
+          'xtick.top': False,
+          'ytick.alignment': 'center_baseline',
+          'ytick.color': '.15',
+          'ytick.direction': 'out',
+          'ytick.labelleft': True,
+          'ytick.labelright': False,
+          'ytick.labelsize': 'medium',
+          'ytick.left': True,
+          'ytick.major.left': True,
+          'ytick.major.pad': 3.5,
+          'ytick.major.right': True,
+          'ytick.major.size': 0.0,
+          'ytick.major.width': 0.8,
+          'ytick.minor.left': True,
+          'ytick.minor.pad': 3.4,
+          'ytick.minor.right': True,
+          'ytick.minor.size': 0.0,
+          'ytick.minor.visible': False,
+          'ytick.minor.width': 0.6,
+          'ytick.right': False})
+
+* Problems
+
+*** FIXED: Missing LaTeX fonts
+
+***** Matplotlib side
+
+******* FIXED: Ran updmap: now getting wrong gliphs [2019-04-17 Wed]
+
+********* svg output is generated, but with wrong glyphs for the text
+
+********* Error messages
+
+/home/fnaufel/anaconda3/lib/python3.6/site-packages/matplotlib/textpath.py:349: UserWarning: The glyph (80) of font (/usr/share/texmf/fonts/type1/public/cm-super/sfrm3583.pfb) cannot be converted with the encoding. Glyph may be wrong
+  "be wrong" % (glyph, font.fname))
+/home/fnaufel/anaconda3/lib/python3.6/site-packages/matplotlib/textpath.py:349: UserWarning: The glyph (108) of font (/usr/share/texmf/fonts/type1/public/cm-super/sfrm3583.pfb) cannot be converted with the encoding. Glyph may be wrong
+  "be wrong" % (glyph, font.fname))
+/home/fnaufel/anaconda3/lib/python3.6/site-packages/matplotlib/textpath.py:349: UserWarning: The glyph (117) of font (/usr/share/texmf/fonts/type1/public/cm-super/sfrm3583.pfb) cannot be converted with the encoding. Glyph may be wrong
+  "be wrong" % (glyph, font.fname))
+/home/fnaufel/anaconda3/lib/python3.6/site-packages/matplotlib/textpath.py:349: UserWarning: The glyph (115) of font (/usr/share/texmf/fonts/type1/public/cm-super/sfrm3583.pfb) cannot be converted with the encoding. Glyph may be wrong
+  "be wrong" % (glyph, font.fname))
+/home/fnaufel/anaconda3/lib/python3.6/site-packages/matplotlib/textpath.py:349: UserWarning: The glyph (115) of font (/usr/share/texmf/fonts/type1/public/cm-super/sfrm3583.pfb) cannot be converted with the encoding. Glyph may be wrong
+  "be wrong" % (glyph, font.fname))
+/home/fnaufel/anaconda3/lib/python3.6/site-packages/matplotlib/textpath.py:349: UserWarning: The glyph (111) of font (/usr/share/texmf/fonts/type1/public/cm-super/sfrm3583.pfb) cannot be converted with the encoding. Glyph may be wrong
+  "be wrong" % (glyph, font.fname))
+/home/fnaufel/anaconda3/lib/python3.6/site-packages/matplotlib/textpath.py:349: UserWarning: The glyph (109) of font (/usr/share/texmf/fonts/type1/public/cm-super/sfrm3583.pfb) cannot be converted with the encoding. Glyph may be wrong
+  "be wrong" % (glyph, font.fname))
+/home/fnaufel/anaconda3/lib/python3.6/site-packages/matplotlib/textpath.py:349: UserWarning: The glyph (101) of font (/usr/share/texmf/fonts/type1/public/cm-super/sfrm3583.pfb) cannot be converted with the encoding. Glyph may be wrong
+  "be wrong" % (glyph, font.fname))
+/home/fnaufel/anaconda3/lib/python3.6/site-packages/matplotlib/textpath.py:349: UserWarning: The glyph (116) of font (/usr/share/texmf/fonts/type1/public/cm-super/sfrm3583.pfb) cannot be converted with the encoding. Glyph may be wrong
+  "be wrong" % (glyph, font.fname))
+/home/fnaufel/anaconda3/lib/python3.6/site-packages/matplotlib/textpath.py:349: UserWarning: The glyph (101) of font (/usr/share/texmf/fonts/type1/public/cm-super/sfrm3583.pfb) cannot be converted with the encoding. Glyph may be wrong
+  "be wrong" % (glyph, font.fname))
+/home/fnaufel/anaconda3/lib/python3.6/site-packages/matplotlib/textpath.py:349: UserWarning: The glyph (120) of font (/usr/share/texmf/fonts/type1/public/cm-super/sfrm3583.pfb) cannot be converted with the encoding. Glyph may be wrong
+  "be wrong" % (glyph, font.fname))
+/home/fnaufel/anaconda3/lib/python3.6/site-packages/matplotlib/textpath.py:349: UserWarning: The glyph (116) of font (/usr/share/texmf/fonts/type1/public/cm-super/sfrm3583.pfb) cannot be converted with the encoding. Glyph may be wrong
+  "be wrong" % (glyph, font.fname))
+/home/fnaufel/anaconda3/lib/python3.6/site-packages/matplotlib/textpath.py:349: UserWarning: The glyph (97) of font (/usr/share/texmf/fonts/type1/public/cm-super/sfrm3583.pfb) cannot be converted with the encoding. Glyph may be wrong
+  "be wrong" % (glyph, font.fname))
+/home/fnaufel/anaconda3/lib/python3.6/site-packages/matplotlib/textpath.py:349: UserWarning: The glyph (116) of font (/usr/share/texmf/fonts/type1/public/cm-super/sfrm3583.pfb) cannot be converted with the encoding. Glyph may be wrong
+  "be wrong" % (glyph, font.fname))
+/home/fnaufel/anaconda3/lib/python3.6/site-packages/matplotlib/textpath.py:349: UserWarning: The glyph (116) of font (/usr/share/texmf/fonts/type1/public/cm-super/sfrm3583.pfb) cannot be converted with the encoding. Glyph may be wrong
+  "be wrong" % (glyph, font.fname))
+/home/fnaufel/anaconda3/lib/python3.6/site-packages/matplotlib/textpath.py:349: UserWarning: The glyph (104) of font (/usr/share/texmf/fonts/type1/public/cm-super/sfrm3583.pfb) cannot be converted with the encoding. Glyph may be wrong
+  "be wrong" % (glyph, font.fname))
+/home/fnaufel/anaconda3/lib/python3.6/site-packages/matplotlib/textpath.py:349: UserWarning: The glyph (101) of font (/usr/share/texmf/fonts/type1/public/cm-super/sfrm3583.pfb) cannot be converted with the encoding. Glyph may be wrong
+  "be wrong" % (glyph, font.fname))
+/home/fnaufel/anaconda3/lib/python3.6/site-packages/matplotlib/textpath.py:349: UserWarning: The glyph (114) of font (/usr/share/texmf/fonts/type1/public/cm-super/sfrm3583.pfb) cannot be converted with the encoding. Glyph may be wrong
+  "be wrong" % (glyph, font.fname))
+/home/fnaufel/anaconda3/lib/python3.6/site-packages/matplotlib/textpath.py:349: UserWarning: The glyph (105) of font (/usr/share/texmf/fonts/type1/public/cm-super/sfrm3583.pfb) cannot be converted with the encoding. Glyph may be wrong
+  "be wrong" % (glyph, font.fname))
+/home/fnaufel/anaconda3/lib/python3.6/site-packages/matplotlib/textpath.py:349: UserWarning: The glyph (103) of font (/usr/share/texmf/fonts/type1/public/cm-super/sfrm3583.pfb) cannot be converted with the encoding. Glyph may be wrong
+  "be wrong" % (glyph, font.fname))
+/home/fnaufel/anaconda3/lib/python3.6/site-packages/matplotlib/textpath.py:349: UserWarning: The glyph (104) of font (/usr/share/texmf/fonts/type1/public/cm-super/sfrm3583.pfb) cannot be converted with the encoding. Glyph may be wrong
+  "be wrong" % (glyph, font.fname))
+/home/fnaufel/anaconda3/lib/python3.6/site-packages/matplotlib/textpath.py:349: UserWarning: The glyph (116) of font (/usr/share/texmf/fonts/type1/public/cm-super/sfrm3583.pfb) cannot be converted with the encoding. Glyph may be wrong
+  "be wrong" % (glyph, font.fname))
+/home/fnaufel/anaconda3/lib/python3.6/site-packages/matplotlib/textpath.py:349: UserWarning: The glyph (115) of font (/usr/share/texmf/fonts/type1/public/cm-super/sfrm3583.pfb) cannot be converted with the encoding. Glyph may be wrong
+  "be wrong" % (glyph, font.fname))
+/home/fnaufel/anaconda3/lib/python3.6/site-packages/matplotlib/textpath.py:349: UserWarning: The glyph (105) of font (/usr/share/texmf/fonts/type1/public/cm-super/sfrm3583.pfb) cannot be converted with the encoding. Glyph may be wrong
+  "be wrong" % (glyph, font.fname))
+/home/fnaufel/anaconda3/lib/python3.6/site-packages/matplotlib/textpath.py:349: UserWarning: The glyph (100) of font (/usr/share/texmf/fonts/type1/public/cm-super/sfrm3583.pfb) cannot be converted with the encoding. Glyph may be wrong
+  "be wrong" % (glyph, font.fname))
+/home/fnaufel/anaconda3/lib/python3.6/site-packages/matplotlib/textpath.py:349: UserWarning: The glyph (101) of font (/usr/share/texmf/fonts/type1/public/cm-super/sfrm3583.pfb) cannot be converted with the encoding. Glyph may be wrong
+  "be wrong" % (glyph, font.fname))
+/home/fnaufel/anaconda3/lib/python3.6/site-packages/matplotlib/textpath.py:349: UserWarning: The glyph (33) of font (/usr/share/texmf/fonts/type1/public/cm-super/sfrm3583.pfb) cannot be converted with the encoding. Glyph may be wrong
+  "be wrong" % (glyph, font.fname))
+/home/fnaufel/anaconda3/lib/python3.6/site-packages/matplotlib/textpath.py:349: UserWarning: The glyph (77) of font (/usr/share/texmf/fonts/type1/public/cm-super/sfrm3583.pfb) cannot be converted with the encoding. Glyph may be wrong
+  "be wrong" % (glyph, font.fname))
+/home/fnaufel/anaconda3/lib/python3.6/site-packages/matplotlib/textpath.py:349: UserWarning: The glyph (58) of font (/usr/share/texmf/fonts/type1/public/cm-super/sfrm3583.pfb) cannot be converted with the encoding. Glyph may be wrong
+  "be wrong" % (glyph, font.fname))
+/home/fnaufel/anaconda3/lib/python3.6/site-packages/matplotlib/textpath.py:349: UserWarning: The glyph (65) of font (/usr/share/texmf/fonts/type1/public/cm-super/sfrm3583.pfb) cannot be converted with the encoding. Glyph may be wrong
+  "be wrong" % (glyph, font.fname))
+/home/fnaufel/anaconda3/lib/python3.6/site-packages/matplotlib/textpath.py:349: UserWarning: The glyph (110) of font (/usr/share/texmf/fonts/type1/public/cm-super/sfrm3583.pfb) cannot be converted with the encoding. Glyph may be wrong
+  "be wrong" % (glyph, font.fname))
+/home/fnaufel/anaconda3/lib/python3.6/site-packages/matplotlib/textpath.py:349: UserWarning: The glyph (98) of font (/usr/share/texmf/fonts/type1/public/cm-super/sfrm3583.pfb) cannot be converted with the encoding. Glyph may be wrong
+  "be wrong" % (glyph, font.fname))
+/home/fnaufel/anaconda3/lib/python3.6/site-packages/matplotlib/font_manager.py:1241: UserWarning: findfont: Font family ['serif'] not found. Falling back to DejaVu Sans.
+  (prop.get_family(), self.defaultFamily[fontext]))
+
+********* FIXED: removed "\fontenc" from LaTeX preamble
+
+******* FIXED: Unable to generate svg file because of missing font
+
+        + Python file that failed to find the font is [[file:~/anaconda3/lib/python3.6/site-packages/matplotlib/dviread.py::def%20__getitem__(self,%20texname):][here]]
+
+        + Message is
+
+          A PostScript file for the font whose TeX name is "{0}" could
+          not be found in the file "{1}". The dviread module can only
+          handle fonts that have an associated PostScript font file.
+
+          This problem can often be solved by installing a suitable
+          PostScript font package in your (TeX) package manager.
+
+        + Missing font is ecss3583
+
+        + Files that I have are
+
+          - /usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/ecss3583.mf
+
+          - /usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/ecss3583.tfm
+
+        + Matplotlib checks file pdftex.map
+
+        + Files having this name on the system are
+
+          - /home/fnaufel/.texmf-var/fonts/map/pdftex/updmap/pdftex.map
+
+          - /usr/share/texlive/texmf-dist/fonts/map/pdftex/updmap/pdftex.map
+
+          - /var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map
+
+***** LaTeX side 
+
+******* General
+
+        + The updmap command generates and manages this
+   
+        + Look into it. Check the EXAMPLES and FILES section of man page
+   
+        + Also http://tug.org/fonts/fontinstall.html
+   
+        + http://linorg.usp.br/CTAN/info/Type1fonts/fontinstallationguide/fontinstallationguide.pdf
+
+******* updmap run [2019-04-17 Wed] 
+
+********* Output
+
+updmap will read the following updmap.cfg files (in precedence order):
+  /usr/share/texmf/web2c/updmap.cfg
+  /usr/share/texlive/texmf-dist/web2c/updmap.cfg
+updmap may write changes to the following updmap.cfg file:
+  /home/fnaufel/.texmf-config/web2c/updmap.cfg
+dvips output dir: "/home/fnaufel/.texmf-var/fonts/map/dvips/updmap"
+pdftex output dir: "/home/fnaufel/.texmf-var/fonts/map/pdftex/updmap"
+dvipdfmx output dir: "/home/fnaufel/.texmf-var/fonts/map/dvipdfmx/updmap"
+
+updmap is creating new map files
+using the following configuration:
+  LW35 font names                  : URWkb (default)
+  prefer outlines                  : true (default)
+  texhash enabled                  : true
+  download standard fonts (dvips)  : true (default)
+  download standard fonts (pdftex) : true (default)
+  kanjiEmbed replacement string    : noEmbed (default)
+  kanjiVariant replacement string  :  (default)
+  create a mapfile for pxdvi       : false (default)
+
+Scanning for LW35 support files  [  3 files]
+Scanning for MixedMap entries    [ 36 files]
+Scanning for KanjiMap entries    [  0 files]
+Scanning for Map entries         [205 files]
+
+Generating output for dvipdfmx...
+Generating output for ps2pk...
+Generating output for dvips...
+Generating output for pdftex...
+
+Files generated:
+  /home/fnaufel/.texmf-var/fonts/map/dvips/updmap:
+       15778 2019-04-17 12:14:39 builtin35.map
+       21251 2019-04-17 12:14:39 download35.map
+     1504772 2019-04-17 12:14:39 psfonts_pk.map
+     1719798 2019-04-17 12:14:39 psfonts_t1.map
+     1719793 2019-04-17 12:14:39 ps2pk.map
+          14 2019-04-17 12:14:39 psfonts.map -> psfonts_t1.map
+  /home/fnaufel/.texmf-var/fonts/map/pdftex/updmap:
+     1719800 2019-04-17 12:14:39 pdftex_dl14.map
+     1718135 2019-04-17 12:14:39 pdftex_ndl14.map
+          15 2019-04-17 12:14:39 pdftex.map -> pdftex_dl14.map
+  /home/fnaufel/.texmf-var/fonts/map/dvipdfmx/updmap:
+         301 2019-04-17 12:14:39 kanjix.map
+
+Transcript written on "/home/fnaufel/.texmf-var/web2c/updmap.log".
+updmap: Updating ls-R files.
+
+***** Check https://www.fontsquirrel.com/fonts/computer-modern
+
+***** Installing packages [2019-04-16 Tue]
+
+      + ttf-aenigma
+      + mathematica-fonts
+      + lcdf-typetools
+      + ttf2ufm
+      + ttf-unifont
+      + otf-trace
+      + fontypython
+      + fonttools
+      + fonts-hack-ttf
+      + ttf-xfree86-nonfree
+      + googlefontdirectory-tools
+      + t1-xfree86-nonfree
+      + python-fontforge
+
+***** https://stackoverflow.com/questions/50875637/matplotlib-how-do-i-have-to-provide-font-metrics-files-for-rendering-text-by-te
+
+      + Referred to by https://stackoverflow.com/questions/54050824/matplotlib-latex-plots-not-working-filenotfounderror-missing-font-metrics-file
+
+      + Refers to https://stackoverflow.com/questions/42097053/matplotlib-cannot-find-basic-fonts
+
+        - Shows how to find the matplotlib cache dir

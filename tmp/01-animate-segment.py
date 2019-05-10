@@ -4,8 +4,6 @@ import matplotlib
 import matplotlib.pyplot as plt
 import ganim as ga
 
-print('Successfully imported', ga.name)
-
 ga.set_up_style()
 
 fig, ax = ga.create_scene()
@@ -16,10 +14,10 @@ scene = ga.render_scene(
                 ax,
                 (.2, .3),
                 (.49, -.49),
-                100,
                 color='r'
         )
 )
 
-#anim.save('segment.mp4')
+# print('Salvando...')
+# scene.save('segment.mp4', fps=24)
 plt.show()

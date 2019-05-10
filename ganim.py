@@ -32,14 +32,14 @@ def set_up_style():
         'axes.spines.top': False,
         'axes.spines.left': True,
         'axes.spines.bottom': True,
-        'figure.dpi': 100,
+        'figure.dpi': 200,
         'figure.edgecolor': 'k',
         'figure.facecolor': 'k',
-        'figure.figsize': [8, 4.5],
+        'figure.figsize': [12.8, 7.15],
         'font.family': ['serif'],
         'font.serif': ['Computer Modern Roman'],
         'patch.edgecolor': 'white',
-        'savefig.dpi': 100,
+        'savefig.dpi': 200,
         'savefig.edgecolor': 'k',
         'savefig.facecolor': 'k',
         'text.color': 'w',
@@ -74,7 +74,7 @@ def create_scene(with_axes=False):
     return fig, ax
 
 
-def animate_segment(ax, point_a, point_b, n_frames, effect='grow', color='w', linewidth=1):
+def animate_segment(ax, point_a, point_b, n_frames=100, effect='grow', color='w', linewidth=1):
     """
     Gera os frames da animação de um segmento.
 
@@ -103,12 +103,14 @@ def animate_segment(ax, point_a, point_b, n_frames, effect='grow', color='w', li
 
             :param i: número do frame a ser desenhado.
             """
+
+            # Calcular incrementos dx e dy de cada frame
             x = xa + i * dx
             y = ya + i * dy
-            line = plt.Line2D((xa, x), (ya, y), linewidth=linewidth, color=color)
-            ax.add_line(line)
+            # Desenhar segmento
+            ax.plot((xa, x), (ya, y), scalex=False, scaley=False, linewidth=linewidth, color=color)
     else:
-        animate_segment_func = None    # TODO: gerar exceção de efeito desconhecido
+        raise ValueError(f'Unknown effect: {effect}')
 
     return animate_segment_func
 
