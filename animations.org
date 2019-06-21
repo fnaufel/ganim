@@ -1,54 +1,50 @@
 
+* [1/4] Tasks
+  :LOGBOOK:
+  - State "TODO"       from              [2019-06-19 Wed 21:07]
+  :END:
+
+*** TODO Debug: timing of 'grow' effect is off
+    :LOGBOOK:
+    - State "TODO"       from              [2019-06-21 Fri 20:37]
+    :END:
+
+    + This causes line segments to be drawn longer than they should.
+
+    + Use matplotlib transformations?
+
+*** TODO Decide: objects drawn should stay drawn until the end of the part???
+    :LOGBOOK:
+    - State "TODO"       from              [2019-06-21 Fri 19:56]
+    :END:
+
+*** TODO Constants from manin: https://github.com/3b1b/manim/blob/master/docs/source/constants.rst
+    :LOGBOOK:
+    - State "TODO"       from              [2019-06-21 Fri 19:55]
+    :END:
+
+    + Use values for video quality etc.
+
+*** DONE Debug: line segment in second part of scene is not draw in the right place 
+    CLOSED: [2019-06-21 Fri 20:36]
+    :LOGBOOK:
+    - State "DONE"       from "TODO"       [2019-06-21 Fri 20:36]
+    - State "TODO"       from              [2019-06-21 Fri 19:55]
+    :END:
+
+    + Hmm, only with grow effect. With None effect, drawing is
+      positioned correctly.
+
+    + Ha. Found it. The __call__ method of the action object receives
+      current_frame as an argument, but the value of this argument is
+      the number of the current frame *counting from the beginning of
+      the scene*. It should be counted from the beginning of the part!
+
 * Specs
-
-*** Script manager function for a scene
-
-    + SceneManager
-
-    + The function to manage the scene will receive a table of the
-      form
-
-      | Duration (secs) | Functions (f), argdicts (ad)                   |
-      |-----------------+------------------------------------------------|
-      | d               | [(f1, ad1), (f2, ad2), ..., (fn, adn)]         |
-      | d'              | [(f'1, ad'1), (f'2, ad'2), ..., (f'n', ad'n')] |
-      | .               | .                                              |
-      | .               | .                                              |
-      | .               | .                                              |
-      |-----------------+------------------------------------------------|
-
-      where
-
-      - ad stands for "argument dict".
-
-      - The entire scene is drawn on the same figure.
-
-      - Each line of the table is a *segment* of the scene.
-
-      - Segments are executed one after the other.
-
-      - Given the desired value of frames per second, the number of
-        frames necessary for each segment is computed by the manager.
-
-      - In each segment, all animations specified by functions f1,
-        ..., fn are executed concurrently; i.e., in each frame of
-        the segment, all functions are executed.
-
-      - To avoid the need for all functions to start execution at
-        the beginning of the segment and end execution at the end of
-        the segment, each function may receive an argument
-        *predelay*, specifying how many seconds to wait before
-        start.
-
-      - Alternatively, a function may receive a boolean argument
-        *wait_for* to control at which frame it should start
-        executing. This would allow the programmer to specify that
-        one part of the animation must end before another part
-        starts.
 
 *** Animation functions or classes?
 
-    + Maybe each animation function will actually be a class (with a
+    + Each animation function will actually be a class (with a
       __call__ method?).
 
     + Each call would have only arguments that change at each frame.
@@ -65,78 +61,22 @@
     + Individual derived classes will be named DoLineSegment,
       DoVector, DoText, etc.
 
-*** Individual animation functions (or AnimationAction derived classes)
-
-***** DoLineSegment
-
-******* Description
-
-        + Draw a line segment.
-
-******* Args
-
-********* ax
-
-          + Axes instance where to draw.
-
-          + Some figures may have more than one Axes object
-            (subplots).
-
-********* point_a
-
-          + Starting point.
-
-********* point_b
-
-          + Ending point.
-
-********* n_frames
-
-            + Number of frames the animation should take.
-
-            + This value will be calculated by [[*Script function for a
-               scene][the script function]], 
-              based on the number of seconds alotted in the table for
-              the scene and on the predelay argument.
-              
-            + If argument wait_for is given, this value will have to
-              be calculated on the fly.
-
-********* effect='grow'
-
-********* color='w'
-
-********* linewidth='1.0'
-
 *** Args common to all animation functions
 
-***** predelay=0
-
-      + How many seconds to wait before execution start.
-
-      + Note that this may cause a problem: if execution of a given
-        function starts too late, it may not complete before the end
-        of the segment. Emit warning in this case. 
-
-***** wait_for=TRUE
-
-      + A boolean flag. The function must wait for it to become true
-        before it starts executing. 
-
-***** total_number_of_frames
+***** total_number_of_frames?
 
       + Total number of frames for the segment, calculated by the
         script function.
 
-***** current_frame_number
+***** start_after
 
-      + Number of the current frame, calculated by the script
-        function.
+      + Number of seconds to wait after beginning of the part, before
+        starting the animation
 
-      + Using this value, the animation function will be able to
-        calculate how many frames are left in the segment and act
-        accordingly (e.g., in the case where the wait_for argument
-        has been used).
+***** end_at
+
+      + Number of seconds after beginning of the part when the
+        animation must end
 
 * Example scenes
 

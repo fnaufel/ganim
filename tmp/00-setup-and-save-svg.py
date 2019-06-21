@@ -2,12 +2,12 @@ import math
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-import ganim
+import core
 
 
-print('Successfully imported', ganim.name)
+print('Successfully imported', core.name)
 
-ganim.set_up_style()
+core.set_up_style()
 
 # font dictionary
 font = {

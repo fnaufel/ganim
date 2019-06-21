@@ -4,7 +4,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import ganim as ga
 
-ga.set_up_style()
+ga.reset_default_style()
 
 fig, ax = ga.create_scene()
 
@@ -13,8 +13,8 @@ scene = ga.render_scene(
         ga.animate_segment(
                 ax,
                 (.2, .3),
-                (.49, -.49),
-                color='r'
+                (.49, .49),
+                color='green'
         )
 )
 
