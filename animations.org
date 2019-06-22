@@ -1,22 +1,38 @@
 
-* [1/4] Tasks
+* [2/6] Tasks
   :LOGBOOK:
   - State "TODO"       from              [2019-06-19 Wed 21:07]
   :END:
 
-*** TODO Debug: timing of 'grow' effect is off
+*** TODO Add start_after and end_at arguments in init_effect method of DoElement
     :LOGBOOK:
-    - State "TODO"       from              [2019-06-21 Fri 20:37]
+    - State "TODO"       from              [2019-06-22 Sat 16:47]
     :END:
 
-    + This causes line segments to be drawn longer than they should.
+    + Calculate start frame, end frame and duration, now taking into
+      consideration start_after and end_at.
 
-    + Use matplotlib transformations?
+    + Set self.start_frame_no, self.end_frame_no,
+      self.total_no_of_frames
+
+    + This should be done in the base class.
+
+    + Don't forget to call super() in init_effect of the derived classes
 
 *** TODO Decide: objects drawn should stay drawn until the end of the part???
     :LOGBOOK:
     - State "TODO"       from              [2019-06-21 Fri 19:56]
     :END:
+
+    + Add argument `stay`?
+
+*** TODO Remove artists drawn in previous frames during animation
+    :LOGBOOK:
+    - State "TODO"       from              [2019-06-22 Sat 13:33]
+    :END:
+
+    + At each frame, the renderer adds artists to a list of objects to
+      be deleted in the next iteration
 
 *** TODO Constants from manin: https://github.com/3b1b/manim/blob/master/docs/source/constants.rst
     :LOGBOOK:
@@ -24,6 +40,19 @@
     :END:
 
     + Use values for video quality etc.
+
+*** DONE Debug: timing of 'grow' effect is off
+    CLOSED: [2019-06-22 Sat 16:41]
+    :LOGBOOK:
+    - State "DONE"       from "TODO"       [2019-06-22 Sat 16:41]
+    - State "TODO"       from              [2019-06-21 Fri 20:37]
+    :END:
+
+    + This causes line segments to be drawn longer than they should.
+
+    + Use matplotlib transformations
+
+    + See __call__ in DoLineSegment class
 
 *** DONE Debug: line segment in second part of scene is not draw in the right place 
     CLOSED: [2019-06-21 Fri 20:36]

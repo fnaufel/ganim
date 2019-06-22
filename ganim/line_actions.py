@@ -1,7 +1,10 @@
-from ganim.animation_actions import DoAnimation
+from matplotlib import lines
+from matplotlib.transforms import Affine2D
+
+from ganim.animation_actions import DoElement
 
 
-class DoLineSegment(DoAnimation):
+class DoLineSegment(DoElement):
     """
     Class to draw a line segment, with various options of animation effects.
 
@@ -22,16 +25,13 @@ class DoLineSegment(DoAnimation):
         Compute initial info necessary to implement animation affect.
 
         """
-
         # TODO: calculate start frame, end frame and duration, now taking into consideration start_after and end_at.
         #  Set self.start_frame_no, self.end_frame_no, self.total_no_of_frames
+        #  Actually, this should be done in superclass.
 
         if self.args['effect'] == 'grow':
-            # Segment will be drawn incrementally, starting at point A, growing towards point B
-
-            # Compute horizontal increment (dx) and vertical increment (dy)
-            self.dx = (self.xb - self.xa) / self.total_no_of_frames
-            self.dy = (self.yb - self.ya) / self.total_no_of_frames
+            # This factor will be multiplied by the current frame number to give the current scale
+            self.grow_factor = 1 / self.total_no_of_frames
 
     def __call__(self, *args, **kwargs):
         """
@@ -46,51 +46,43 @@ class DoLineSegment(DoAnimation):
 
         """
 
-        current_frame = args[0]
+        current_frame_in_part = args[0]
 
         if self.args['effect'] is None:
             # Draw segment with no animation
-            self.draw_plain(
-                (self.xa, self.xb),
-                (self.ya, self.yb)
-            )
+            line = lines.Line2D([self.xa, self.xb], [self.ya, self.yb])
+            self.draw_plain(line)
+
         elif self.args['effect'] == 'grow':
-            self.grow(current_frame)
+            self.grow(current_frame_in_part)
+
         else:
             raise ValueError(f'Unknown effect: {self.args["effect"]}')
 
-    def grow(self, current_frame):
+    def grow(self, current_frame_in_part):
         """
         Draw part of the segment, from initial point to a point corresponding to the current frame.
 
-        :param current_frame:
+        :param current_frame_in_part: number of the current frame with respect to beginning of part.
 
         """
 
-        # Compute new coordinates of the end of the segment
-        x = self.xa + current_frame * self.dx
-        y = self.ya + current_frame * self.dy
+        scale = current_frame_in_part * self.grow_factor
+        transform = Affine2D().scale(scale) + \
+                    Affine2D().translate(self.xa * (1 - scale), self.ya * (1 - scale)) + \
+                    self.args['ax'].transData
 
-        self.draw_plain(
-            (self.xa, x),
-            (self.ya, y)
-        )
+        line = lines.Line2D([self.xa, self.xb], [self.ya, self.yb], transform=transform)
+        self.draw_plain(line)
 
-    def draw_plain(self, point_a, point_b):
+    def draw_plain(self, line):
         """
         Draw a plain segment from point_a to point_b.
 
-        :param point_a:
-
-        :param point_b:
+        :param line:
 
         """
 
-        self.args['ax'].plot(
-                point_a,
-                point_b,
-                scalex=False,  # This is to prevent the axes size from changing as the segment grows
-                scaley=False,  # This is to prevent the axes size from changing as the segment grows
-                linewidth=self.args['linewidth'],
-                color=self.args['color']
-        )
+        line.set_color(self.args['color'])
+        line.set_linewidth(self.args['linewidth'])
+        self.args['ax'].add_line(line)

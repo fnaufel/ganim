@@ -5,10 +5,10 @@ from matplotlib.animation import FuncAnimation
 # Default values for global variables ####################################
 
 # Frames per second
-FPS_DEFAULT = 30
+FPS_DEFAULT = 60
 
 # Interval between frames (in milliseconds)
-INTERVAL_DEFAULT = 1000/FPS_DEFAULT
+INTERVAL_DEFAULT = 1000 / FPS_DEFAULT
 
 # Limits for x axis (in data coords)
 XLIM_DEFAULT = (-1, 5)
@@ -22,6 +22,7 @@ FPS = FPS_DEFAULT
 INTERVAL = INTERVAL_DEFAULT
 XLIM = XLIM_DEFAULT
 YLIM = YLIM_DEFAULT
+
 
 ##########################################################################
 
@@ -40,6 +41,7 @@ def reset_default_config():
     INTERVAL = INTERVAL_DEFAULT
     XLIM = XLIM_DEFAULT
     YLIM = YLIM_DEFAULT
+
 
 def reset_default_style():
     """
@@ -110,6 +112,7 @@ def create_scene(with_axes=False, xlim=XLIM, ylim=YLIM):
 
     ax.set_xlim(xlim)
     ax.set_ylim(ylim)
+    ax.set_aspect('equal')
 
     return fig, ax
 
@@ -117,8 +120,6 @@ def create_scene(with_axes=False, xlim=XLIM, ylim=YLIM):
 def render_scene(scene, fig):
     """
     Manage the rendering of the entire scene.
-
-    Each scene is a list of *parts*.
 
     Each scene corresponds to a table of the form
 
@@ -136,7 +137,7 @@ def render_scene(scene, fig):
 
     The `n` parts of the scene are executed *sequentially*.
 
-    Each line of the `Actions` column is a list of actions *to be executed simulaneously*; i.e., `a_11, ...,
+    Each line of the `Actions` column is a list of actions *to be executed simultaneously*; i.e., `a_11, ...,
     a_1m` are executed concurrently in a part of the scene that lasts for `d_1` seconds.
 
     The total duration of the scene, then, is the sum of all durations `d_1 + ... + d_n`.
@@ -154,34 +155,12 @@ def render_scene(scene, fig):
 
     """
 
-    # If no axes where specified in the scene, use first axes of Figure instance as default
+    # Use the first axes of Figure instance as default
     default_ax = fig.get_axes()[0]
 
-    last_frame_no = 0
-
-    for part in scene:
-
-        # Calculate start_frame and end_frame for each part of the scene and store values in the dictionary for the part
-        part['start_frame_no'] = last_frame_no + 1
-        part['end_frame_no']   = part['start_frame_no'] + part['duration'] * FPS
-
-        for action in part['actions']:
-
-            # Inform the action object about the ax where to draw (if an ax was already specified when the action
-            # object was created, then the action object will know to ignore this call)
-            action.set_default_ax(default_ax)
-
-            # Inform each action object about the start and end frames of the part where it is contained
-            action.set_part_cues(
-                part['start_frame_no'],
-                part['end_frame_no']
-            )
-
-            # Make each action object initialize its effects, because those effects usually need info about start
-            # frame, end frame, and duration of the part of the scene where they appear
-            action.init_effect()
-
-        last_frame_no = part['end_frame_no']
+    # Inform actions of their cues etc.
+    # Also, get number of last frame of this scene
+    last_frame_no = cue_actions(default_ax, scene)
 
     # Build a function to be called by `FuncAnimation` to render the entire scene
     # Note that this uses lexical scoping to access the `scene` variable
@@ -197,7 +176,7 @@ def render_scene(scene, fig):
 
         # Determine which part must be executed at the current frame
         for part in scene:
-            if part['end_frame_no'] >= current_frame:
+            if part['end_frame_no'] > current_frame:
                 current_part = part
                 # Calculate number of current frame with respect to beginning of part (not beginning of scene)
                 current_frame_in_part = current_frame - part['start_frame_no'] + 1
@@ -208,6 +187,49 @@ def render_scene(scene, fig):
             action(current_frame_in_part)
 
     # Finally, call `FuncAnimation` with our `animation_manager` function
-    rendered_scene = FuncAnimation(fig, animation_manager, interval=INTERVAL, frames=last_frame_no)
+    rendered_scene = FuncAnimation(
+            fig,
+            animation_manager,
+            interval=INTERVAL,
+            frames=int(last_frame_no)
+    )
 
     return rendered_scene
+
+
+def cue_actions(default_ax, scene):
+    """
+    Calculate start and end frame numbers for each action in the scene. Inform actions of the default ax where to
+    draw (in case the action object was created without one).
+
+    :param default_ax:
+
+    :param scene:
+
+    :return: number of the last frame of the scene.
+
+    """
+    last_frame_no = 0
+    for part in scene:
+
+        # Calculate start_frame and end_frame for each part of the scene and store values in the dictionary for the part
+        part['start_frame_no'] = last_frame_no + 1
+        part['end_frame_no'] = part['start_frame_no'] + part['duration'] * FPS
+
+        for action in part['actions']:
+            # Inform the action object about the ax where to draw (if an ax was already specified when the action
+            # object was created, then the action object will know to ignore this call)
+            action.set_default_ax(default_ax)
+
+            # Inform each action object about the start and end frames of the part where it is contained
+            action.set_part_cues(
+                    part['start_frame_no'],
+                    part['end_frame_no']
+            )
+
+            # Make each action object initialize its effects, because those effects usually need info about start
+            # frame, end frame, and duration of the part of the scene where they appear
+            action.init_effect()
+
+        last_frame_no = part['end_frame_no']
+    return last_frame_no

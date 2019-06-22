@@ -18,12 +18,12 @@ parts = [
                 point_b=(4, 3),
                 color='blue',
                 **args
-            )
-        ]
-    },
-    {
-        'duration': 1,
-        'actions': [
+            ),
+        # ]
+    # },
+    # {
+    #     'duration': .5,
+    #     'actions': [
             DoLineSegment(
                     point_a=(0, 0),
                     point_b=(4, 0),

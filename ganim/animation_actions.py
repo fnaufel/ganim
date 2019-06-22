@@ -1,5 +1,5 @@
 
-class DoAnimation(object):
+class DoElement(object):
     """
     Base class for all animation actions.
 
