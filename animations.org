@@ -1,28 +1,23 @@
 
-* [3/8] Tasks
+* [4/9] Tasks
   :LOGBOOK:
   - State "TODO"       from              [2019-06-19 Wed 21:07]
   :END:
+
+*** TODO Debug: segments07-new-class-api
+    :LOGBOOK:
+    - State "TODO"       from "DONE"       [2019-06-24 Mon 20:39]
+    - State "DONE"       from              [2019-06-24 Mon 20:39]
+    :END:
+
+    + The segment drawn with start_after is too long
+
+    + It uses the current frame number for scale, but it shouldn't!
 
 *** TODO Create DoPoint class
     :LOGBOOK:
     - State "TODO"       from              [2019-06-23 Sun 19:36]
     :END:
-
-*** TODO Add start_after and end_at arguments in init_effect method of DoElement
-    :LOGBOOK:
-    - State "TODO"       from              [2019-06-22 Sat 16:47]
-    :END:
-
-    + Calculate start frame, end frame and duration, now taking into
-      consideration start_after and end_at.
-
-    + Set self.start_frame_no, self.end_frame_no,
-      self.total_no_of_frames
-
-    + This should be done in the base class.
-
-    + Don't forget to call super() in init_effect of the derived classes
 
 *** TODO Decide: objects drawn should stay drawn until the end of the part???
     :LOGBOOK:
@@ -45,6 +40,23 @@
     :END:
 
     + Use values for video quality etc.
+
+*** DONE Add start_after and end_at arguments in init_effect method of DoElement
+    CLOSED: [2019-06-24 Mon 20:38]
+    :LOGBOOK:
+    - State "DONE"       from "TODO"       [2019-06-24 Mon 20:38]
+    - State "TODO"       from              [2019-06-22 Sat 16:47]
+    :END:
+
+    + Calculate start frame, end frame and duration, now taking into
+      consideration start_after and end_at.
+
+    + Set self.start_frame_no, self.end_frame_no,
+      self.total_no_of_frames
+
+    + This should be done in the base class.
+
+    + Don't forget to call super() in init_effect of the derived classes
 
 *** DONE Change DoElement constructors to take positional args (besides kwargs)
     CLOSED: [2019-06-23 Sun 19:36]

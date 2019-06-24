@@ -1,3 +1,10 @@
+"""
+Core module for ganim.
+
+"""
+
+from pprint import pprint
+
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
@@ -91,151 +98,260 @@ def reset_default_style():
     matplotlib.style.use(default_style)
 
 
-def create_scene(with_axes=False, xlim=XLIM, ylim=YLIM):
-    """
-    Create a new scene.
+class Scene(object):
 
-    :param with_axes: if True, draw the x and y axes (spines)
-
-    :param xlim: a tuple (xmin, xmax)
-
-    :param ylim: a tuple (ymin, ymax)
-
-    :return:
-      (fig, ax): instance of Figure and instance of Axes.
-
-    """
-
-    fig, ax = plt.subplots()
-    if not with_axes:
-        ax.set_axis_off()
-
-    ax.set_xlim(xlim)
-    ax.set_ylim(ylim)
-    ax.set_aspect('equal')
-
-    return fig, ax
-
-
-def render_scene(scene, fig):
-    """
-    Manage the rendering of the entire scene.
-
-    Each scene corresponds to a table of the form
-
-    ======== =======
-    Duration Actions
-    ======== =======
-    d_1      [a_11, ..., a_1m]
-    ...      ...
-    d_n      [a_n1, ..., a_nm]
-    ======== =======
-
-    Each line of the table is a *part* of the scene.
-
-    Each `d_i` is a duration in seconds.
-
-    The `n` parts of the scene are executed *sequentially*.
-
-    Each line of the `Actions` column is a list of actions *to be executed simultaneously*; i.e., `a_11, ...,
-    a_1m` are executed concurrently in a part of the scene that lasts for `d_1` seconds.
-
-    The total duration of the scene, then, is the sum of all durations `d_1 + ... + d_n`.
-
-    TODO: Include example here.
-
-    :param scene: The specification of the scene, as described above. The Python representation of a scene is as
-    *a list of dictionaries*. Each line of the table is represented by a `dict` with keys `duration` and `actions`.
-    The value of `actions` is a list of action objects -- i.e., instances of classes derived from the `DoAnimation`
-    class.
-
-    :param fig: The `Figure` instance where the scene is rendered.
-
-    :return: An instance of `FuncAnimation` to render the scene. This instance can be used to show or to save the scene.
-
-    """
-
-    # Use the first axes of Figure instance as default
-    default_ax = fig.get_axes()[0]
-
-    # Inform actions of their cues etc.
-    # Also, get number of last frame of this scene
-    last_frame_no = cue_actions(default_ax, scene)
-
-    # Build a function to be called by `FuncAnimation` to render the entire scene
-    # Note that this uses lexical scoping to access the `scene` variable
-    def animation_manager(current_frame):
+    def __init__(self, with_axes=False, xlim=XLIM, ylim=YLIM):
         """
-        Function to be called by `FuncAnimation`.
+        Create a new, empty scene.
 
-        Find which part of the scene must be executed at the current frame and call the corresponding action objects.
+        :param bool with_axes: if True, draw the x and y axes (spines)
 
-        **Attention:** this is the **first time** that frame numbers are converted from *scene* referential to *part*
-        referential. The action objects are called with the converted frame numbers (i.e., wrt *part* referential).
+        :param xlim: a tuple (xmin, xmax)
 
-        :param current_frame: number of current frame (wrt to the beginning of the scene), to be passed by
-        `FuncAnimation`.
+        :param ylim: a tuple (ymin, ymax)
 
         """
 
-        nonlocal scene
+        self.fig, self.ax = plt.subplots()
 
-        # Determine which part must be executed at the current frame
-        for part in scene:
-            if part['end_frame_no'] > current_frame:
-                current_part = part
-                # Convert number of current frame in scene to number of current frame in part
-                current_frame_in_part = current_frame - part['start_frame_no'] + 1
-                break
+        if not with_axes:
+            self.ax.set_axis_off()
 
-        # Call action objects for the current part
-        for action in current_part['actions']:
-            action(current_frame_in_part)
+        self.ax.set_xlim(xlim)
+        self.ax.set_ylim(ylim)
+        self.ax.set_aspect('equal')
 
-    # Finally, call `FuncAnimation` with our `animation_manager` function
-    rendered_scene = FuncAnimation(
-            fig,
-            animation_manager,
-            interval=INTERVAL,
-            frames=int(last_frame_no)
-    )
+        self.last_part_no = -1
+        self.parts = []
+        self.last_frame_no = -1
+        self.rendered_scene = None
 
-    return rendered_scene
+    def add_part(self, script, duration):
+        """
+        Add a new part to this scene.
+
+        A scene may have one or more parts, which are executed *sequentially*; i.e., part 0 must finish executing
+        before part 1 begins execution.
+
+        A part is specified by a *script*, which consists of a *list of actions* (i.e., instances of `DoElement` or
+        its subclasses), all of which are executed *concurrently*. The specification of a part also has a *duration*
+        in seconds.
+
+        The first part is numbered 0.
+
+        :param list script:
+
+        :param int|float duration:
+
+        """
+        if not script:
+            raise ValueError('Part must not be empty.')
+
+        if duration <= 0:
+            raise ValueError(f'Duration ({duration}) must be > 0.')
+
+        self.last_part_no += 1
+
+        # We must pass the ax, because the script may contain actions which will use this ax as the default
+        part = Part(self.last_part_no, script, duration, self.ax)
+
+        # Store this part in list
+        self.parts.append(part)
+
+    def cue_parts(self):
+        """
+        For each part in the scene: compute start and end frame numbers for the part and for all the actions in the
+        part.
+
+        """
+
+        for part in self.parts:
+            # Update part with start and end frame numbers for the actions in the part's script
+            part.cue(self.last_frame_no)
+            # Update last taken frame number of the scene with last frame number of the part we just cued
+            self.last_frame_no = part.last_frame_no
+
+    def scene_ticker(self):
+        """
+        Returns a list of tuples of the form (part number, frame number), one tuple for each frame of the scene.
+
+        It does this by concatenating the tickers of the parts comprising the scene.
+
+        :return list[tuple[int, int]]:
+
+        """
+
+        ticker = []
+
+        for part in self.parts:
+            ticker = ticker + part.get_ticker()
+
+        return ticker
+
+    def render(self):
+        """
+        Render the scene.
+
+        All parts must be cued first. Then we build an inner function --- the animation_manager --- to be passed to
+        FuncAnimation, which does the actual rendering.
+
+        """
+
+        self.cue_parts()
+
+        ################################################################################################################
+
+        def animation_manager(tick):
+            """
+            A driver for the actions to be executed in the scene.
+
+            Depending on the current value of the ticker (part number, frame number), it calls the appropriate actions.
+
+            :param tuple[int, int] tick:
+            """
+
+            nonlocal self
+
+            part_no, frame_no_in_part = tick
+
+            current_part = self.parts[part_no]
+
+            for cued_action in current_part.cued_actions:
+                # Careful: some actions in this part may have different start and/or end frame numbers, because they may
+                # have been scripted with nonzero values of the `start_after` and/or `end_at` arguments
+                if cued_action.start_frame_in_part <= frame_no_in_part <= cued_action.end_frame_in_part:
+                    cued_action.action(frame_no_in_part)
+
+        ################################################################################################################
+
+        # Do it!
+        # For some obscure reason, things broke when I passed the ticker as an iterator, so now scene_ticker() is a list
+        self.rendered_scene = FuncAnimation(
+                self.fig,
+                animation_manager,
+                interval=INTERVAL,
+                frames=self.scene_ticker()
+        )
+
+    def save(self, filename):
+        """
+        Save the rendered scene to a file.
+
+        :param str filename:
+        """
+
+        self.rendered_scene.save(filename)
 
 
-def cue_actions(default_ax, scene):
-    """
-    Calculate start and end frame numbers for each action in the scene. Inform actions of the default ax where to
-    draw (in case the action object was created without one).
+class Part(object):
 
-    :param default_ax:
+    def __init__(self, number, script, duration, default_ax):
+        """
+        A part of the scene.
 
-    :param scene:
+        :param int number: first part is 0.
 
-    :return: number of the last frame of the scene.
+        :param list script: list of actions to be executed concurrently in this part.
 
-    """
-    last_frame_no = 0
-    for part in scene:
+        :param float duration: in seconds.
 
-        # Calculate start_frame and end_frame for each part of the scene and store values in the dictionary for the part
-        part['start_frame_no'] = last_frame_no + 1
-        part['end_frame_no'] = part['start_frame_no'] + part['duration'] * FPS
+        :param default_ax: instance of matplotlib.axes.Axes
 
-        for action in part['actions']:
-            # Inform the action object about the ax where to draw (if an ax was already specified when the action
-            # object was created, then the action object will know to ignore this call)
-            action.set_default_ax(default_ax)
+        """
 
-            # Inform each action object about the start and end frames of the part where it is contained
-            action.set_cues(
-                    part['start_frame_no'],
-                    part['end_frame_no']
-            )
+        self.number = number
+        self.script = script
+        self.duration = duration
+        self.default_ax = default_ax
 
-            # Make each action object initialize its effects, because those effects usually need info about start
-            # frame, end frame, and duration of the part of the scene where they appear
-            action.init_effect()
+        self.start_frame_no = None
+        self.last_frame_no = None
+        self.cued_actions = []
 
-        last_frame_no = part['end_frame_no']
-    return last_frame_no
+    def cue(self, last_taken_frame_no):
+        """
+        Compute cues for this part and for the actions it contains.
+
+        **NOTE:**
+
+        * The cues for the *part* are frame numbers relative to the *beginning of the scene*.
+
+        * The cues for the *actions* are frame numbers relative to the *beginning of the part*.
+
+        :param int last_taken_frame_no: number of the last frame of the scene used by the previous part.
+
+        """
+
+        # Picking up after the last frame of previous part
+        self.start_frame_no = last_taken_frame_no + 1
+
+        # When computing the last frame number of this part, ignore the actions' `start_after` and `end_at`
+        # attributes, because the part's total duration (as specified with the script) has precedence
+        self.last_frame_no = self.start_frame_no + self.duration * FPS - 1
+
+        for action in self.script:
+
+            # Starting frame of this action (beginning of part is zero)
+            if action.args['start_after'] is None:
+                start_frame_in_part = 0
+            else:
+                start_frame_in_part = action.args['start_after'] * FPS
+
+            # Ending frame of this action (beginning of part is zero)
+            if action.args['end_at'] is None:
+                end_frame_in_part = self.last_frame_no - self.start_frame_no
+            else:
+                end_frame_in_part = action.args['end_at'] * FPS - 1
+
+            # Store cued action in list field
+            # Again, note we need to pass the default ax, as the action may have been scripted without an explicit ax
+            cued_action = CuedAction(action, start_frame_in_part, end_frame_in_part, self.default_ax)
+            self.cued_actions.append(cued_action)
+
+    def get_ticker(self):
+        """
+        Returns the ticker for this part.
+
+        The ticker is a list of tuples of the form (part number, frame number), to be used by FuncAnimation.
+
+        :return list[tuple[int, int]]:
+
+        """
+
+        # Range from 0 to total of frames in part
+        frames = range(self.last_frame_no - self.start_frame_no + 1)
+        part_no = [self.number] * len(frames)
+
+        return list(zip(part_no, frames))
+
+
+class CuedAction(object):
+
+    def __init__(self, action, start_frame_in_part, end_frame_in_part, default_ax):
+        """
+        Information about a cued action.
+
+        :param DoElement action: an instance of DoElement or its subclasses.
+
+        :param int start_frame_in_part: number of the frame where the action should start drawing, already honoring a
+            possible `start_after` value in the script.
+
+        :param int end_frame_in_part: number of the frame where the action should stop drawing, already honoring a
+            possible `end_at` value in the script.
+
+        :param default_ax: instance of matplotlib.axes.Axes.
+
+        """
+
+        self.action = action
+        self.start_frame_in_part = start_frame_in_part
+        self.end_frame_in_part = end_frame_in_part
+        self.total_no_of_frames = end_frame_in_part - start_frame_in_part + 1
+
+        # Now we have the information needed to initialize the action's effects, which may depend on the total number
+        # of frames the action will take
+        action.init_effect(self.total_no_of_frames)
+
+        # If the user did not specify an ax where the action should draw, we provide the default ax
+        if action.ax is None:
+            action.ax = default_ax

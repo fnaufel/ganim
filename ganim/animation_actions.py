@@ -19,6 +19,9 @@ class DoElement(object):
 
         # Defaults for all animation actions
         self.args = {
+            'ax': None,
+            'start_after': None,
+            'end_at': None,
             'effect': None,
             'linewidth': 1.0,
             'color': 'w'
@@ -27,38 +30,11 @@ class DoElement(object):
         if kwargs:
             self.args.update(kwargs)
 
-    def set_cues(self, start, end):
-        """
-        This method is called by the function responsible for rendering the scene to inform this action object of its
-        cues (i.e., the start and end frame numbers of this action's part, altered by this action object's
-        start_after and end_at values).
+        # Store the ax (possibly None) in a field
+        # If None, the default ax will be provided elsewhere
+        self.ax = self.args['ax']
 
-        The number of the start frame, the number of the end frame, and the total number of frames are stored as
-        fields.
-
-        :param start: number of start frame of the part (wrt to the beginning of the scene)
-
-        :param end: number of end frame of the part (wrt to the beginning of the scene)
-
-        """
-
-        # TODO: calculate start frame, end frame and duration, now taking into consideration start_after and end_at.
-        #  Set self.start_frame_no, self.end_frame_no, self.total_no_of_frames
-
-        self.start_frame_no = start
-        self.end_frame_no = end
-        self.total_no_of_frames = end - start
-
-    def set_default_ax(self, ax):
-        """
-        Only if the axes were not specified at construction time, this method will set them.
-
-        :param ax:
-        """
-        if self.args.get('ax') is None:
-            self.args['ax'] = ax
-
-    def init_effect(self):
+    def init_effect(self, total_no_of_frames):
         raise NotImplementedError
 
     def __call__(self, *args, **kwargs):

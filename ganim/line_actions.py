@@ -38,28 +38,28 @@ class DoLineSegment(DoElement):
         super().__init__(**kwargs)
 
         if len(args) == 2:
-            # Process positional args
-            # Initial point of the segment
+            # End points of the segment may be given as positional args...
             self.xa, self.ya = args[0]
-            # End point of the segment
             self.xb, self.yb = args[1]
         else:
-            # Initial point of the segment
+            # ...or end points of the segment may be given as kwargs
             self.xa, self.ya = self.args['point_a']
-            # End point of the segment
             self.xb, self.yb = self.args['point_b']
 
-    def init_effect(self):
+        self.grow_factor = None
+
+    def init_effect(self, total_no_of_frames):
         """
         Compute initial info necessary to implement animation affect.
 
+        :param total_no_of_frames: duration of this action in frames.
+
         """
 
-        # TODO: take into consideration start_after and end_at
-
         if self.args['effect'] == 'grow':
-            # This factor will be multiplied by the current frame number to give the current scale
-            self.grow_factor = 1 / self.total_no_of_frames
+            # During execution of this action, this factor will be multiplied by the current frame number to give the
+            # current scale of the segment to be drawn
+            self.grow_factor = 1 / total_no_of_frames
 
     def __call__(self, *args, **kwargs):
 
@@ -84,10 +84,10 @@ class DoLineSegment(DoElement):
 
         """
 
-        scale = current_frame_in_part * self.grow_factor
+        scale = (current_frame_in_part + 1) * self.grow_factor
         transform = Affine2D().scale(scale) + \
                     Affine2D().translate(self.xa * (1 - scale), self.ya * (1 - scale)) + \
-                    self.args['ax'].transData
+                    self.ax.transData
 
         line = lines.Line2D([self.xa, self.xb], [self.ya, self.yb], transform=transform)
         self.draw_in_frame(line)
@@ -102,4 +102,4 @@ class DoLineSegment(DoElement):
 
         line.set_color(self.args['color'])
         line.set_linewidth(self.args['linewidth'])
-        self.args['ax'].add_line(line)
+        self.ax.add_line(line)
