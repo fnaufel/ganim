@@ -1,30 +1,25 @@
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
+# subclasses podem ter __init__ com quantidade de args diferente da superclasse
 
-fig, ax = plt.subplots()
+class A(object):
 
-x = np.arange(0, 2*np.pi, 0.01)
-line, = ax.plot(x, np.sin(x))
-#line, = ax.plot(x, [0] * len(x))
+    def __init__(self, x):
+        self.x = x
 
+    def __str__(self):
+        return f'A: x = {self.x}\n'
 
-def init():  # only required for blitting to give a clean slate.
-    line.set_ydata([np.nan] * len(x))
-    return line,
+class B(A):
 
+    def __init__(self, x, y):
+        super().__init__(x)
+        self.y = y
 
-def animate(i):
-    line.set_ydata(np.sin(x + i / 100))  # update the data.
-    return line,
+    def __str__(self):
+        s1 = super().__str__()
+        return s1 + f'B: y = {self.y}\n'
 
+a = A(1)
+b = B(2, 3)
 
-ani = animation.FuncAnimation(
-    fig, animate, init_func=init, interval=2, blit=True, save_count=50)
-
-# To save the animation, use e.g.
-#
-# ani.save("movie.mp4")
-#
-
-plt.show()
+print(a)
+print(b)

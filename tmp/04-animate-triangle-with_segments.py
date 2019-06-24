@@ -14,8 +14,8 @@ parts = [
         'duration': 1,
         'actions': [
             DoLineSegment(
-                point_a=(4, 0),
-                point_b=(4, 3),
+                (4, 0),
+                (4, 3),
                 color='blue',
                 **args
             ),
@@ -25,14 +25,14 @@ parts = [
     #     'duration': .5,
     #     'actions': [
             DoLineSegment(
-                    point_a=(0, 0),
-                    point_b=(4, 0),
+                    (0, 0),
+                    (4, 0),
                     color='r',
                     **args
             ),
             DoLineSegment(
-                    point_a=(0, 0),
-                    point_b=(4, 3),
+                    (0, 0),
+                    (4, 3),
                     color='green',
                     **args
             )

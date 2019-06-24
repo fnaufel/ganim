@@ -1,8 +1,13 @@
 
-* [2/6] Tasks
+* [3/8] Tasks
   :LOGBOOK:
   - State "TODO"       from              [2019-06-19 Wed 21:07]
   :END:
+
+*** TODO Create DoPoint class
+    :LOGBOOK:
+    - State "TODO"       from              [2019-06-23 Sun 19:36]
+    :END:
 
 *** TODO Add start_after and end_at arguments in init_effect method of DoElement
     :LOGBOOK:
@@ -40,6 +45,13 @@
     :END:
 
     + Use values for video quality etc.
+
+*** DONE Change DoElement constructors to take positional args (besides kwargs)
+    CLOSED: [2019-06-23 Sun 19:36]
+    :LOGBOOK:
+    - State "DONE"       from "TODO"       [2019-06-23 Sun 19:36]
+    - State "TODO"       from              [2019-06-23 Sun 19:17]
+    :END:
 
 *** DONE Debug: timing of 'grow' effect is off
     CLOSED: [2019-06-22 Sat 16:41]

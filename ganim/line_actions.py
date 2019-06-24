@@ -1,3 +1,7 @@
+"""
+Actions involving lines: segments, vectors, curves.
+"""
+
 from matplotlib import lines
 from matplotlib.transforms import Affine2D
 
@@ -8,50 +12,63 @@ class DoLineSegment(DoElement):
     """
     Class to draw a line segment, with various options of animation effects.
 
+    * **Positional arguments:**
+
+        * `(x0, y0)`: a tuple representing the initial point
+
+        * `(x1, y1)`: a tuple representing the final point
+
+    * **Keyword arguments:**
+
+        * `point_a`: `(x0, y0)` (if not specified as a positional arg)
+
+        * `point_b`: `(x1, y1)` (if not specified as a positional arg)
+
+        * `effect`: `None` | `'grow'`
+
+        * `color`
+
+        * `linewidth`
+
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
 
-        super(DoLineSegment, self).__init__(**kwargs)
+        # super() will store kwargs in self.args dictionary
+        super().__init__(**kwargs)
 
-        # Initial point of the segment
-        self.xa, self.ya = self.args['point_a']
-
-        # End point of the segment
-        self.xb, self.yb = self.args['point_b']
+        if len(args) == 2:
+            # Process positional args
+            # Initial point of the segment
+            self.xa, self.ya = args[0]
+            # End point of the segment
+            self.xb, self.yb = args[1]
+        else:
+            # Initial point of the segment
+            self.xa, self.ya = self.args['point_a']
+            # End point of the segment
+            self.xb, self.yb = self.args['point_b']
 
     def init_effect(self):
         """
         Compute initial info necessary to implement animation affect.
 
         """
-        # TODO: calculate start frame, end frame and duration, now taking into consideration start_after and end_at.
-        #  Set self.start_frame_no, self.end_frame_no, self.total_no_of_frames
-        #  Actually, this should be done in superclass.
+
+        # TODO: take into consideration start_after and end_at
 
         if self.args['effect'] == 'grow':
             # This factor will be multiplied by the current frame number to give the current scale
             self.grow_factor = 1 / self.total_no_of_frames
 
     def __call__(self, *args, **kwargs):
-        """
-        Execute animation action: draw the segment on the current frame, using the specified effect.
-
-        This method will be called by `FuncAnimation` once for each frame.
-
-        :param args: list of positional arguments. The first argument is the current frame number, as counted from
-        the beginning of the part (not from the beginning of the scene!!!).
-
-        :param kwargs: list of keyword arguments. May be empty.
-
-        """
 
         current_frame_in_part = args[0]
 
         if self.args['effect'] is None:
             # Draw segment with no animation
             line = lines.Line2D([self.xa, self.xb], [self.ya, self.yb])
-            self.draw_plain(line)
+            self.draw_in_frame(line)
 
         elif self.args['effect'] == 'grow':
             self.grow(current_frame_in_part)
@@ -73,9 +90,9 @@ class DoLineSegment(DoElement):
                     self.args['ax'].transData
 
         line = lines.Line2D([self.xa, self.xb], [self.ya, self.yb], transform=transform)
-        self.draw_plain(line)
+        self.draw_in_frame(line)
 
-    def draw_plain(self, line):
+    def draw_in_frame(self, line):
         """
         Draw a plain segment from point_a to point_b.
 
