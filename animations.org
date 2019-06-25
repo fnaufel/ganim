@@ -1,23 +1,5 @@
 
-* [4/9] Tasks
-  :LOGBOOK:
-  - State "TODO"       from              [2019-06-19 Wed 21:07]
-  :END:
-
-*** TODO Debug: segments07-new-class-api
-    :LOGBOOK:
-    - State "TODO"       from "DONE"       [2019-06-24 Mon 20:39]
-    - State "DONE"       from              [2019-06-24 Mon 20:39]
-    :END:
-
-    + The segment drawn with start_after is too long
-
-    + It uses the current frame number for scale, but it shouldn't!
-
-*** TODO Create DoPoint class
-    :LOGBOOK:
-    - State "TODO"       from              [2019-06-23 Sun 19:36]
-    :END:
+* [5/10] Tasks
 
 *** TODO Decide: objects drawn should stay drawn until the end of the part???
     :LOGBOOK:
@@ -34,12 +16,34 @@
     + At each frame, the renderer adds artists to a list of objects to
       be deleted in the next iteration
 
+*** TODO  Create DoCircle class
+    :LOGBOOK:
+    - State "TODO"       from              [2019-06-25 Tue 12:56]
+    :END:
+
+*** TODO Create DoPoint class
+    :LOGBOOK:
+    - State "TODO"       from              [2019-06-23 Sun 19:36]
+    :END:
+
 *** TODO Constants from manin: https://github.com/3b1b/manim/blob/master/docs/source/constants.rst
     :LOGBOOK:
     - State "TODO"       from              [2019-06-21 Fri 19:55]
     :END:
 
     + Use values for video quality etc.
+
+*** DONE Debug: segments07-new-class-api
+    CLOSED: [2019-06-25 Tue 12:55]
+    :LOGBOOK:
+    - State "DONE"       from "TODO"       [2019-06-25 Tue 12:55]
+    - State "TODO"       from "DONE"       [2019-06-24 Mon 20:39]
+    - State "DONE"       from              [2019-06-24 Mon 20:39]
+    :END:
+
+    + The segment drawn with start_after is too long
+
+    + It uses the current frame number for scale, but it shouldn't!
 
 *** DONE Add start_after and end_at arguments in init_effect method of DoElement
     CLOSED: [2019-06-24 Mon 20:38]

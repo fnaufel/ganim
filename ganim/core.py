@@ -220,7 +220,7 @@ class Scene(object):
                 # Careful: some actions in this part may have different start and/or end frame numbers, because they may
                 # have been scripted with nonzero values of the `start_after` and/or `end_at` arguments
                 if cued_action.start_frame_in_part <= frame_no_in_part <= cued_action.end_frame_in_part:
-                    cued_action.action(frame_no_in_part)
+                    cued_action.run(frame_no_in_part)
 
         ################################################################################################################
 
@@ -355,3 +355,18 @@ class CuedAction(object):
         # If the user did not specify an ax where the action should draw, we provide the default ax
         if action.ax is None:
             action.ax = default_ax
+
+    def run(self, frame_no_in_part):
+        """
+        Run the action.
+
+        The action may have been specified with a nonzero `start_after` value. In this case, in order to preserve the
+        timing of the action's effect, we must 'fool' the action to make it think the current frame value is 0 when
+        it is actually the value of `start_after`. This is done by subtracting the `start_after` value from the
+        current frame number and calling the action with the resulting value.
+
+        :param frame_no_in_part: number of current frame in part (first frame = 0)
+
+        """
+
+        self.action(frame_no_in_part - self.start_frame_in_part)
