@@ -47,6 +47,8 @@ class DoLineSegment(DoElement):
             self.xb, self.yb = self.args['point_b']
 
         self.grow_factor = None
+        self.artist = None
+        self.transform = None
 
     def init_effect(self, total_no_of_frames):
         """
@@ -67,39 +69,75 @@ class DoLineSegment(DoElement):
 
         if self.args['effect'] is None:
             # Draw segment with no animation
-            line = lines.Line2D([self.xa, self.xb], [self.ya, self.yb])
-            self.draw_in_frame(line)
+            new_artist = self.show()
 
         elif self.args['effect'] == 'grow':
-            self.grow(current_frame_in_part)
+            new_artist = self.grow(current_frame_in_part)
 
         else:
             raise ValueError(f'Unknown effect: {self.args["effect"]}')
 
+        self.draw_element(new_artist)
+
+    def show(self):
+        """
+        Make entire line to be drawn.
+
+        :return: artist (line) to be drawn.
+
+        """
+        self.transform = self.ax.transData
+        new_artist = self.make_new_artist()
+
+        return new_artist
+
     def grow(self, current_frame_in_part):
         """
-        Draw part of the segment, from initial point to a point corresponding to the current frame.
+        Make line: part of the segment, from initial point to a point corresponding to the current frame.
 
         :param current_frame_in_part: number of the current frame with respect to beginning of part.
 
+        :return: artist (line) to be drawn.
         """
 
         scale = (current_frame_in_part + 1) * self.grow_factor
-        transform = Affine2D().scale(scale) + \
+        self.transform = Affine2D().scale(scale) + \
                     Affine2D().translate(self.xa * (1 - scale), self.ya * (1 - scale)) + \
                     self.ax.transData
 
-        line = lines.Line2D([self.xa, self.xb], [self.ya, self.yb], transform=transform)
-        self.draw_in_frame(line)
+        new_artist = self.make_new_artist()
 
-    def draw_in_frame(self, line):
+        return new_artist
+
+    def make_new_artist(self):
         """
-        Draw a plain segment from point_a to point_b.
+        Compute new form of the element to be drawn, using information from self's fields.
 
-        :param line:
+        :return: new artist to be drawn.
 
         """
 
-        line.set_color(self.args['color'])
-        line.set_linewidth(self.args['linewidth'])
-        self.ax.add_line(line)
+        return lines.Line2D([self.xa, self.xb], [self.ya, self.yb], transform=self.transform)
+
+    def draw_element(self, new_artist):
+        """
+        Remove previous form of the element, draw current form of the element, and update self.artist.
+
+        :param new_artist: current form of the element.
+
+        """
+
+        self.remove_artist()
+        self.artist = new_artist
+        self.artist.set_color(self.args['color'])
+        self.artist.set_linewidth(self.args['linewidth'])
+        self.ax.add_line(self.artist)
+
+    def remove_artist(self):
+        """
+        Remove the element from the ax (i.e., from the scene), if the element exists.
+
+        """
+
+        if self.artist:
+            self.artist.remove()

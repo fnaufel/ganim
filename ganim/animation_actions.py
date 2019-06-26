@@ -22,8 +22,9 @@ class DoElement(object):
             'ax': None,
             'start_after': None,
             'end_at': None,
+            'stay': True,
             'effect': None,
-            'linewidth': 1.0,
+            'linewidth': 2.0,
             'color': 'w'
         }
 
@@ -54,4 +55,10 @@ class DoElement(object):
         :param kwargs: list of keyword arguments. May be empty.
 
         """
+        raise NotImplementedError
+
+    def draw_element(self, new_artist):
+        raise NotImplementedError
+
+    def remove_artist(self):
         raise NotImplementedError

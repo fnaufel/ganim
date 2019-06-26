@@ -1,29 +1,19 @@
 
-* [5/10] Tasks
+* [8/12] Tasks
 
-*** TODO Decide: objects drawn should stay drawn until the end of the part???
+*** TODO Create DoVector class (subclass of DoLineSegment)
     :LOGBOOK:
-    - State "TODO"       from              [2019-06-21 Fri 19:56]
-    :END:
-
-    + Add argument `stay`?
-
-*** TODO Remove artists drawn in previous frames during animation
-    :LOGBOOK:
-    - State "TODO"       from              [2019-06-22 Sat 13:33]
-    :END:
-
-    + At each frame, the renderer adds artists to a list of objects to
-      be deleted in the next iteration
-
-*** TODO  Create DoCircle class
-    :LOGBOOK:
-    - State "TODO"       from              [2019-06-25 Tue 12:56]
+    - State "TODO"       from              [2019-06-26 Wed 17:35]
     :END:
 
 *** TODO Create DoPoint class
     :LOGBOOK:
     - State "TODO"       from              [2019-06-23 Sun 19:36]
+    :END:
+
+*** TODO Create DoCircle class
+    :LOGBOOK:
+    - State "TODO"       from              [2019-06-25 Tue 12:56]
     :END:
 
 *** TODO Constants from manin: https://github.com/3b1b/manim/blob/master/docs/source/constants.rst
@@ -32,6 +22,43 @@
     :END:
 
     + Use values for video quality etc.
+
+*** DONE Decide: objects drawn should stay drawn until the end of the part???
+    CLOSED: [2019-06-26 Wed 17:35]
+    :LOGBOOK:
+    - State "DONE"       from "TODO"       [2019-06-26 Wed 17:35]
+    - State "TODO"       from              [2019-06-21 Fri 19:56]
+    :END:
+
+    + Add argument `stay`
+
+    + Decision????:
+
+      - objects *always* stay until the end of the part
+
+      - if `stay` == True, they stay until the end of the scene (default)
+
+*** CANCELED Remove artists drawn in previous frames during animation?
+    CLOSED: [2019-06-25 Tue 17:02]
+    :LOGBOOK:
+    - State "CANCELED"   from "TODO"       [2019-06-25 Tue 17:02]
+    - State "TODO"       from              [2019-06-22 Sat 13:33]
+    :END:
+
+    + At each frame, the renderer adds artists to a list of objects to
+      be deleted in the next iteration
+
+*** DONE Store the artist in a field of the DoElement classes
+    CLOSED: [2019-06-25 Tue 17:02]
+    :LOGBOOK:
+    - State "DONE"       from "TODO"       [2019-06-25 Tue 17:02]
+    - State "TODO"       from              [2019-06-25 Tue 16:46]
+    :END:
+
+    + And create a method only to add it to the ax
+
+    + This will make it easier to have other methods apply more
+      transformations to the same element in the same frame
 
 *** DONE Debug: segments07-new-class-api
     CLOSED: [2019-06-25 Tue 12:55]

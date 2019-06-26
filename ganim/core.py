@@ -3,8 +3,6 @@ Core module for ganim.
 
 """
 
-from pprint import pprint
-
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
@@ -188,6 +186,17 @@ class Scene(object):
 
         return ticker
 
+    def remove_artists_in_part(self, part_no):
+        """
+        Remove those elements that should not stay beyond the end of the part.
+
+        :param part_no: part number to process.
+
+        """
+        for action in self.parts[part_no].cued_actions:
+            if not action.stay:
+                action.remove_artist()
+
     def render(self):
         """
         Render the scene.
@@ -207,7 +216,8 @@ class Scene(object):
 
             Depending on the current value of the ticker (part number, frame number), it calls the appropriate actions.
 
-            :param tuple[int, int] tick:
+            :param tuple[int, int] tick: (part number, frame number in part)
+
             """
 
             nonlocal self
@@ -216,11 +226,14 @@ class Scene(object):
 
             current_part = self.parts[part_no]
 
+            # Run actions for this part
             for cued_action in current_part.cued_actions:
-                # Careful: some actions in this part may have different start and/or end frame numbers, because they may
-                # have been scripted with nonzero values of the `start_after` and/or `end_at` arguments
                 if cued_action.start_frame_in_part <= frame_no_in_part <= cued_action.end_frame_in_part:
                     cued_action.run(frame_no_in_part)
+
+            # Remove elements from the previous part that should not stay until the end of the scene
+            if part_no > 0 and frame_no_in_part == 0:
+                self.remove_artists_in_part(part_no - 1)
 
         ################################################################################################################
 
@@ -347,6 +360,7 @@ class CuedAction(object):
         self.start_frame_in_part = start_frame_in_part
         self.end_frame_in_part = end_frame_in_part
         self.total_no_of_frames = end_frame_in_part - start_frame_in_part + 1
+        self.stay = self.action.args['stay']
 
         # Now we have the information needed to initialize the action's effects, which may depend on the total number
         # of frames the action will take
@@ -369,4 +383,13 @@ class CuedAction(object):
 
         """
 
-        self.action(frame_no_in_part - self.start_frame_in_part)
+        frame_no_since_start = frame_no_in_part - self.start_frame_in_part
+        self.action(frame_no_since_start)
+
+    def remove_artist(self):
+        """
+        Remove the element from the ax
+
+        """
+
+        self.action.remove_artist()

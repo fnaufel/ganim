@@ -22,4 +22,4 @@ s1.add_part(
 print(f'Rendering scene s1:\n{s1}...')
 s1.render()
 print('Saving...')
-s1.save('segments07-new-class-api.mp4')
+s1.save('segments08-stay.mp4')
