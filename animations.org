@@ -1,5 +1,13 @@
 
-* [8/12] Tasks
+* [8/13] Tasks
+
+*** TODO Refactor: merge Action and CuedAction
+    :LOGBOOK:
+    - State "TODO"       from              [2019-06-26 Wed 20:38]
+    :END:
+
+    + Move everything possible to DoElement, to make it easier to
+      subclass it.
 
 *** TODO Create DoVector class (subclass of DoLineSegment)
     :LOGBOOK:

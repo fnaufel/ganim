@@ -229,7 +229,13 @@ class Scene(object):
             # Run actions for this part
             for cued_action in current_part.cued_actions:
                 if cued_action.start_frame_in_part <= frame_no_in_part <= cued_action.end_frame_in_part:
-                    cued_action.run(frame_no_in_part)
+                    # The action may have been specified with a nonzero `start_after` value. In this case, in order
+                    # to preserve the timing of the action's effect, we must 'fool' the action to make it think the
+                    # current frame value is 0 when it is actually the value of `start_after`. This is done by
+                    # subtracting the `start_after` value from the current frame number and calling the action with
+                    # the resulting value.
+                    frame_no_since_start = frame_no_in_part - cued_action.start_frame_in_part
+                    cued_action(frame_no_since_start)
 
             # Remove elements from the previous part that should not stay until the end of the scene
             if part_no > 0 and frame_no_in_part == 0:
@@ -318,8 +324,8 @@ class Part(object):
 
             # Store cued action in list field
             # Again, note we need to pass the default ax, as the action may have been scripted without an explicit ax
-            cued_action = CuedAction(action, start_frame_in_part, end_frame_in_part, self.default_ax)
-            self.cued_actions.append(cued_action)
+            action.cue(start_frame_in_part, end_frame_in_part, self.default_ax)
+            self.cued_actions.append(action)
 
     def get_ticker(self):
         """
@@ -336,60 +342,3 @@ class Part(object):
         part_no = [self.number] * len(frames)
 
         return list(zip(part_no, frames))
-
-
-class CuedAction(object):
-
-    def __init__(self, action, start_frame_in_part, end_frame_in_part, default_ax):
-        """
-        Information about a cued action.
-
-        :param DoElement action: an instance of DoElement or its subclasses.
-
-        :param int start_frame_in_part: number of the frame where the action should start drawing, already honoring a
-            possible `start_after` value in the script.
-
-        :param int end_frame_in_part: number of the frame where the action should stop drawing, already honoring a
-            possible `end_at` value in the script.
-
-        :param default_ax: instance of matplotlib.axes.Axes.
-
-        """
-
-        self.action = action
-        self.start_frame_in_part = start_frame_in_part
-        self.end_frame_in_part = end_frame_in_part
-        self.total_no_of_frames = end_frame_in_part - start_frame_in_part + 1
-        self.stay = self.action.args['stay']
-
-        # Now we have the information needed to initialize the action's effects, which may depend on the total number
-        # of frames the action will take
-        action.init_effect(self.total_no_of_frames)
-
-        # If the user did not specify an ax where the action should draw, we provide the default ax
-        if action.ax is None:
-            action.ax = default_ax
-
-    def run(self, frame_no_in_part):
-        """
-        Run the action.
-
-        The action may have been specified with a nonzero `start_after` value. In this case, in order to preserve the
-        timing of the action's effect, we must 'fool' the action to make it think the current frame value is 0 when
-        it is actually the value of `start_after`. This is done by subtracting the `start_after` value from the
-        current frame number and calling the action with the resulting value.
-
-        :param frame_no_in_part: number of current frame in part (first frame = 0)
-
-        """
-
-        frame_no_since_start = frame_no_in_part - self.start_frame_in_part
-        self.action(frame_no_since_start)
-
-    def remove_artist(self):
-        """
-        Remove the element from the ax
-
-        """
-
-        self.action.remove_artist()

@@ -8,7 +8,7 @@ s1.add_part(
     [
         DoLineSegment((0, 0), (4, 3), color='green', stay=False)
     ],
-    duration=2
+    duration=1
 )
 
 s1.add_part(
@@ -16,7 +16,7 @@ s1.add_part(
         DoLineSegment((4, 0), (4, 3), color='blue', effect='grow'),
         DoLineSegment((0, 0), (4, 0), color='red', effect='grow')
     ],
-    duration=2
+    duration=1
 )
 
 print(f'Rendering scene s1:\n{s1}...')

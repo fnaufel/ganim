@@ -47,39 +47,30 @@ class DoLineSegment(DoElement):
             self.xb, self.yb = self.args['point_b']
 
         self.grow_factor = None
-        self.artist = None
-        self.transform = None
 
-    def init_effect(self, total_no_of_frames):
+    def init_grow(self):
         """
-        Compute initial info necessary to implement animation affect.
-
-        :param total_no_of_frames: duration of this action in frames.
+        Compute initial info necessary to implement grow affect.
 
         """
 
-        if self.args['effect'] == 'grow':
-            # During execution of this action, this factor will be multiplied by the current frame number to give the
-            # current scale of the segment to be drawn
-            self.grow_factor = 1 / total_no_of_frames
+        # During execution of this action, this factor will be multiplied by the current frame number to give the
+        # current scale of the segment to be drawn
+        self.grow_factor = 1 / self.total_no_of_frames
 
-    def __call__(self, *args, **kwargs):
+    def define_effects(self):
+        """
+        Define dictionary. Keys are names of effects, values are methods to implement the effects.
 
-        current_frame_in_part = args[0]
+        """
 
-        if self.args['effect'] is None:
-            # Draw segment with no animation
-            new_artist = self.show()
+        self.effects = {
+            'None': {'init': None, 'run': self.show},
+            'grow': {'init': self.init_grow, 'run': self.grow}
+            # 'shrink':
+        }
 
-        elif self.args['effect'] == 'grow':
-            new_artist = self.grow(current_frame_in_part)
-
-        else:
-            raise ValueError(f'Unknown effect: {self.args["effect"]}')
-
-        self.draw_element(new_artist)
-
-    def show(self):
+    def show(self, current_frame_in_part):
         """
         Make entire line to be drawn.
 
@@ -119,7 +110,7 @@ class DoLineSegment(DoElement):
 
         return lines.Line2D([self.xa, self.xb], [self.ya, self.yb], transform=self.transform)
 
-    def draw_element(self, new_artist):
+    def draw_element(self):
         """
         Remove previous form of the element, draw current form of the element, and update self.artist.
 
@@ -128,16 +119,7 @@ class DoLineSegment(DoElement):
         """
 
         self.remove_artist()
-        self.artist = new_artist
+        self.artist = self.new_artist
         self.artist.set_color(self.args['color'])
         self.artist.set_linewidth(self.args['linewidth'])
         self.ax.add_line(self.artist)
-
-    def remove_artist(self):
-        """
-        Remove the element from the ax (i.e., from the scene), if the element exists.
-
-        """
-
-        if self.artist:
-            self.artist.remove()
