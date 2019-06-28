@@ -17,28 +17,30 @@ class DoNewElement(DoElement):
     """
     Class to draw a <new element>, with various options of animation effects.
 
-    * **Positional arguments:**
-
-        * ...
-
-    * **Keyword arguments:**
-
-        * ...
-
-        * `effect`: `None` | ...
-
-        * `color`
-
-        * `linewidth`
-
-        * ...
-
     """
 
     def __init__(self, *args, **kwargs):
+        """
+        * **Positional arguments:**
+
+            * ...
+
+        * **Keyword arguments:**
+
+            * ...
+
+            * `effect`: `None` | ...
+
+            * `color`
+
+            * `linewidth`
+
+            * ...
+
+        """
 
         # This command must be included: super() will store kwargs in self.args dictionary
-        super().__init__(**kwargs)
+        super().__init__(*args, **kwargs)
 
         # More initialization commands go here...
 
