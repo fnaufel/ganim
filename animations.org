@@ -1,13 +1,10 @@
 
-* [8/13] Tasks
+* [9/14] Tasks
 
-*** TODO Refactor: merge Action and CuedAction
+*** TODO Write user guide in README.md
     :LOGBOOK:
-    - State "TODO"       from              [2019-06-26 Wed 20:38]
+    - State "TODO"       from              [2019-06-28 Fri 17:31]
     :END:
-
-    + Move everything possible to DoElement, to make it easier to
-      subclass it.
 
 *** TODO Create DoVector class (subclass of DoLineSegment)
     :LOGBOOK:
@@ -30,6 +27,18 @@
     :END:
 
     + Use values for video quality etc.
+
+*** DONE Refactor: merge Action and CuedAction
+    CLOSED: [2019-06-28 Fri 17:31]
+    :LOGBOOK:
+    - State "DONE"       from "TODO"       [2019-06-28 Fri 17:31]
+    - State "TODO"       from              [2019-06-26 Wed 20:38]
+    :END:
+
+    + Moved everything possible to DoElement, to make it easier to
+      subclass it.
+
+    + Now clean up.
 
 *** DONE Decide: objects drawn should stay drawn until the end of the part???
     CLOSED: [2019-06-26 Wed 17:35]

@@ -131,9 +131,9 @@ class Scene(object):
         A scene may have one or more parts, which are executed *sequentially*; i.e., part 0 must finish executing
         before part 1 begins execution.
 
-        A part is specified by a *script*, which consists of a *list of actions* (i.e., instances of `DoElement` or
-        its subclasses), all of which are executed *concurrently*. The specification of a part also has a *duration*
-        in seconds.
+        A part is specified by a *script*, which consists of a *list of actions* (i.e., instances of subclasses of
+        `DoElement`), all of which are executed *concurrently*. The specification of a part also has a *duration* in
+        seconds.
 
         The first part is numbered 0.
 

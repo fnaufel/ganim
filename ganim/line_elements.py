@@ -1,11 +1,11 @@
 """
-Actions involving lines: segments, vectors, curves.
+Actions involving lines: segments, vectors...
 """
 
 from matplotlib import lines
 from matplotlib.transforms import Affine2D
 
-from ganim.animation_actions import DoElement
+from ganim.elements import DoElement
 
 
 class DoLineSegment(DoElement):
@@ -46,6 +46,7 @@ class DoLineSegment(DoElement):
             self.xa, self.ya = self.args['point_a']
             self.xb, self.yb = self.args['point_b']
 
+        # To be used by 'grow' effect
         self.grow_factor = None
 
     def init_grow(self):
@@ -58,9 +59,10 @@ class DoLineSegment(DoElement):
         # current scale of the segment to be drawn
         self.grow_factor = 1 / self.total_no_of_frames
 
-    def define_effects(self):
+    def define_effects_dict(self):
         """
-        Define dictionary. Keys are names of effects, values are methods to implement the effects.
+        Define dictionary. Keys are names of effects, values are methods to implement the effects ('init': method to
+        initialize effect, 'run': method to apply effect).
 
         """
 
@@ -77,6 +79,8 @@ class DoLineSegment(DoElement):
         :return: artist (line) to be drawn.
 
         """
+
+        # Default transform
         self.transform = self.ax.transData
         new_artist = self.make_new_artist()
 

@@ -1,5 +1,5 @@
 import ganim as ga
-from ganim.line_actions import DoLineSegment
+from ganim.line_elements import DoLineSegment
 
 ga.reset_default_style()
 

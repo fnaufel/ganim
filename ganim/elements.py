@@ -1,7 +1,14 @@
+"""
+Base classes for elements.
+
+Elements are geometric entities endowed with animation effects.
+
+"""
+
 
 class DoElement(object):
     """
-    Base class for all animation actions.
+    Base class for all 2D animation actions.
 
     To be more flexible, arguments may be passed to the constructor as keyword arguments. Arguments common to all
     animation actions are dealt with here in this base class.
@@ -19,10 +26,15 @@ class DoElement(object):
 
         # Defaults for all animation actions
         self.args = {
+            # Ax where to draw
             'ax': None,
+            # How many seconds after beginning of part to wait before starting execution
             'start_after': None,
+            # Time in seconds after beginning of part when execution must end
             'end_at': None,
+            # Should the element stay in the figure after the end of the part?
             'stay': True,
+            # Effect to apply to the element
             'effect': 'None',
             'linewidth': 2.0,
             'color': 'w'
@@ -38,59 +50,69 @@ class DoElement(object):
         # Should element stay in the figure beyond the end of the part?
         self.stay = self.args['stay']
 
+        # Dictionary of effects and their respective methods (to be defined by subclasses)
+        self.effects = None
+
+        # Define effects based on subclass implementation
+        self.define_effects_dict()
+
         # Fields to be assigned to by the cue() method
         self.start_frame_in_part = None
         self.end_frame_in_part = None
         self.total_no_of_frames = None
 
-        self.effects = None
+        # Artist drawn in the current frame
         self.artist = None
-        self.transform = None
+
+        # Artist being constructed, to be drawn in the next frame
         self.new_artist = None
 
-        # Define effects
-        self.define_effects()
+        # Transformation to be applied to the artist
+        self.transform = None
 
-    def define_effects(self):
+    def define_effects_dict(self):
         """
         Define dictionary. Keys are names of effects, values are methods to implement the effects.
 
+        Must be implemented by subclass.
+
         """
 
-        self.effects = {}
+        raise NotImplementedError
 
-    def init_effects(self):
+    def init_effect(self):
+        """
+        Initialize the effect chosen by the user for this element, if an 'init' method is provided in self.effects.
+
+        """
 
         method = self.effects[self.args['effect']]['init']
         if method is not None:
             method()
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, current_frame_in_part):
         """
         Execute animation action: draw the element on the current frame, using the specified effect. This method will
-        be called by the `render_scene` method once for each frame.
+        be called once for each frame.
 
         **Attention:**
 
-        The first positional argument will the current frame number, as counted from the beginning of the part (not
-        from the beginning of the scene!!!). It does *not* matter to this element when in the scene it will be drawn,
+        The first argument will the current frame number, as counted from the beginning of the part (not from the
+        beginning of the scene!!!). It does *not* matter to this element when in the scene it will be drawn,
         but it matters when in the *part* it will be drawn, because the element has to honor `start_after` and
         `end_at` times, which are specified by the user wrt to the beginning of the part.
 
-        :param args: list of positional arguments.
-
-        :param kwargs: list of keyword arguments. May be empty.
+        :param current_frame_in_part:
 
         """
 
-        current_frame_in_part = args[0]
         method = self.effects[self.args['effect']]['run']
         self.new_artist = method(current_frame_in_part)
         self.draw_element()
 
     def cue(self, start_frame_in_part, end_frame_in_part, default_ax):
         """
-        Assign cueing and drawing information (frame numbers and default ax)
+        Assign cueing and drawing information (frame numbers and default ax).
 
         :param int start_frame_in_part: number of the frame where the action should start drawing, already honoring a
             possible `start_after` value in the script.
@@ -101,13 +123,14 @@ class DoElement(object):
         :param default_ax: instance of matplotlib.axes.Axes.
 
         """
+
         self.start_frame_in_part = start_frame_in_part
         self.end_frame_in_part = end_frame_in_part
         self.total_no_of_frames = end_frame_in_part - start_frame_in_part + 1
 
         # Now we have the information needed to initialize the action's effects, which may depend on the total number
         # of frames the action will take
-        self.init_effects()
+        self.init_effect()
 
         # If the user did not specify an ax where the action should draw, we provide the default ax
         if self.ax is None:
@@ -116,8 +139,6 @@ class DoElement(object):
     def draw_element(self):
         """
         Remove previous form of the element, draw current form of the element, and update self.artist.
-
-        :param new_artist: current form of the element.
 
         """
 
@@ -135,3 +156,15 @@ class DoElement(object):
 
         if self.artist:
             self.artist.remove()
+
+    def make_new_artist(self):
+        """
+        Compute new form of the element to be drawn, using information from self's fields.
+
+        Usually, this will mean creating a new artist and applying a transformation to it, based on the chosen effect.
+
+        :return: new artist to be drawn.
+
+        """
+
+        raise NotImplementedError
