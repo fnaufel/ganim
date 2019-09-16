@@ -1,10 +1,16 @@
 
 * [13/22] Tasks
 
-*** TODO Create DoPoint class
+*** STARTED Create DoPoint class
     :LOGBOOK:
+    - State "STARTED"    from "TODO"       [2019-09-16 Mon 20:17]
     - State "TODO"       from              [2019-06-23 Sun 19:36]
     :END:
+
+    + Test whether creating a Line2D instance with a single marker is ok.
+
+    + This will allow all kinds of shapes and fill options for the
+      point (i.e., actually a marker) to be drawn.
 
 *** TODO Create DoCircle class
     :LOGBOOK:

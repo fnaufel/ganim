@@ -31,7 +31,7 @@ class DoNewElement(DoElement):
 
             * ...
 
-            * `effect`: `None` | ...
+            * `effect`: 'None' | ...
 
             * `color`
 
@@ -63,10 +63,12 @@ class DoNewElement(DoElement):
         # Ask superclass to initialize effects dict
         super().define_effects_dict()
 
-        # Create effects dict for this class
+        # Create effects dict for this class.
+        # Some effects are created and handled by the DoElement superclass, as such effects do not depend on the
+        # nature of the element. Examples are fadein and fadeout. You don't have to worry about them
         element_effects = {
             'None': {'init': None, 'run': self.show},
-            'effect1': {'init': self.init_effect1, 'run': self.run_effect1}
+            'effect1': {'init': self.init_effect1, 'run': self.run_effect1},
             # TODO: add other effects:
             # 'name': {'init': init_effect1, 'run': run_effect1},
             # ...
@@ -153,17 +155,17 @@ class DoNewElement(DoElement):
 
         The following implementation will usually be enough.
 
+        If you don't need to change anything in this implementation, you may safely delete this method, as this is
+        precisely the code the superclass implements for it.
+
         """
 
         self.remove_artist()
         self.artist = self.new_artist
 
-        # TODO: apply more visual configuration, if necessary
-        self.artist.set_color(self.args['color'])
-        self.artist.set_linewidth(self.args['linewidth'])
-
-        # TODO: if, instead of a single artist, a *list* of artists must be drawn on the frame, then self.artist will
-        #  be a list. In this case, you must loop through the list and add the artists to the ax one by one.
-        #  Also, a specialized add method (e.g., add_line) may be used below instead of add_artist
-
-        self.ax.add_artist(self.artist)
+        #  TODO: a specialized add method (e.g., add_line) may be used below instead of add_artist
+        if isinstance(self.artist, list):
+            for a in self.artist:
+                self.ax.add_artist(a)
+        else:
+            self.ax.add_artist(self.artist)
