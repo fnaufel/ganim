@@ -1,5 +1,5 @@
 """
-Actions involving lines: segments, vectors...
+Actions involving lines: segments, vectors etc
 """
 
 from matplotlib import lines
@@ -24,7 +24,7 @@ class DoLineSegment(DoElement):
 
         * `point_b`: `(x1, y1)` (if not specified as a positional arg)
 
-        * `effect`: `None` | `'grow'`
+        * `effect`: 'None' | 'grow' | 'shrink' | 'fadein' | 'fadeout'
 
         * `color`
 
@@ -46,18 +46,8 @@ class DoLineSegment(DoElement):
             self.xa, self.ya = self.args['point_a']
             self.xb, self.yb = self.args['point_b']
 
-        # To be used by 'grow' effect
+        # To be used by 'grow' and 'shrink' effects
         self.grow_factor = None
-
-    def init_grow(self):
-        """
-        Compute initial info necessary to implement grow affect.
-
-        """
-
-        # During execution of this action, this factor will be multiplied by the current frame number to give the
-        # current scale of the segment to be drawn
-        self.grow_factor = 1 / self.total_no_of_frames
 
     def define_effects_dict(self):
         """
@@ -66,11 +56,35 @@ class DoLineSegment(DoElement):
 
         """
 
-        self.effects = {
+        super().define_effects_dict()
+
+        line_effects = {
             'None': {'init': None, 'run': self.show},
-            'grow': {'init': self.init_grow, 'run': self.grow}
-            # 'shrink':
+            'grow': {'init': self.init_grow, 'run': self.grow},
+            'shrink': {'init': self.init_grow, 'run': self.shrink},
         }
+
+        self.effects.update(line_effects)
+
+    def make_new_artist(self):
+        """
+        Compute new form of the element to be drawn, using information from self's fields.
+
+        :return: new artist to be drawn.
+
+        """
+
+        return lines.Line2D([self.xa, self.xb], [self.ya, self.yb], **self.artist_kwargs)
+
+    def draw_element(self):
+        """
+        Remove previous form of the element, draw current form of the element, and update self.artist.
+
+        """
+
+        self.remove_artist()
+        self.artist = self.new_artist
+        self.ax.add_line(self.artist)
 
     def show(self, current_frame_in_part):
         """
@@ -82,9 +96,17 @@ class DoLineSegment(DoElement):
 
         # Default transform
         self.transform = self.ax.transData
-        new_artist = self.make_new_artist()
+        return self.make_new_artist()
 
-        return new_artist
+    def init_grow(self):
+        """
+        Compute initial info necessary to implement grow effect.
+
+        """
+
+        # During execution of this action, this factor will be multiplied by the current frame number to give the
+        # current scale of the segment to be drawn
+        self.grow_factor = 1 / self.total_no_of_frames
 
     def grow(self, current_frame_in_part):
         """
@@ -96,34 +118,24 @@ class DoLineSegment(DoElement):
         """
 
         scale = (current_frame_in_part + 1) * self.grow_factor
-        self.transform = Affine2D().scale(scale) + \
+        self.artist_kwargs['transform'] = Affine2D().scale(scale) + \
                     Affine2D().translate(self.xa * (1 - scale), self.ya * (1 - scale)) + \
                     self.ax.transData
 
-        new_artist = self.make_new_artist()
+        return self.make_new_artist()
 
-        return new_artist
-
-    def make_new_artist(self):
+    def shrink(self, current_frame_in_part):
         """
-        Compute new form of the element to be drawn, using information from self's fields.
+        Make line: part of the segment, from initial point to a point corresponding to the current frame.
 
-        :return: new artist to be drawn.
+        :param current_frame_in_part: number of the current frame with respect to beginning of part.
 
-        """
-
-        return lines.Line2D([self.xa, self.xb], [self.ya, self.yb], transform=self.transform)
-
-    def draw_element(self):
-        """
-        Remove previous form of the element, draw current form of the element, and update self.artist.
-
-        :param new_artist: current form of the element.
-
+        :return: artist (line) to be drawn.
         """
 
-        self.remove_artist()
-        self.artist = self.new_artist
-        self.artist.set_color(self.args['color'])
-        self.artist.set_linewidth(self.args['linewidth'])
-        self.ax.add_line(self.artist)
+        scale = 1 - (current_frame_in_part + 1) * self.grow_factor
+        self.artist_kwargs['transform'] = Affine2D().scale(scale) + \
+                    Affine2D().translate(self.xa * (1 - scale), self.ya * (1 - scale)) + \
+                    self.ax.transData
+
+        return self.make_new_artist()

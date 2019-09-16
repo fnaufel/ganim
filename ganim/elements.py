@@ -36,8 +36,6 @@ class DoElement(object):
             'stay': True,
             # Effect to apply to the element
             'effect': 'None',
-            'linewidth': 2.0,
-            'color': 'w'
         }
 
         if kwargs:
@@ -56,19 +54,30 @@ class DoElement(object):
         # Define effects based on subclass implementation
         self.define_effects_dict()
 
+        # To be used by 'fadein' and 'fadeout' effects
+        self.fade_factor = None
+
         # Fields to be assigned to by the cue() method
         self.start_frame_in_part = None
         self.end_frame_in_part = None
         self.total_no_of_frames = None
 
-        # Artist drawn in the current frame
+        # Artist (or list of artists) drawn in the current frame
         self.artist = None
 
-        # Artist being constructed, to be drawn in the next frame
+        # Artist (or list of artists) being constructed, to be drawn in the next frame
         self.new_artist = None
 
-        # Transformation to be applied to the artist
-        self.transform = None
+        # Default kwargs used in drawing the artist
+        self.artist_kwargs = {
+            'linewidth': 2.0,
+            'color': 'w'
+        }
+
+        # If different values were specified in the call to the constructor, update:
+        self.artist_kwargs.update(
+                {key: kwargs[key] for key in kwargs if key in self.artist_kwargs}
+        )
 
     def define_effects_dict(self):
         """
@@ -78,7 +87,10 @@ class DoElement(object):
 
         """
 
-        raise NotImplementedError
+        self.effects = {
+            'fadein': {'init': self.init_fade, 'run': self.fadein},
+            'fadeout': {'init': self.init_fade, 'run': self.fadeout},
+        }
 
     def init_effect(self):
         """
@@ -144,9 +156,12 @@ class DoElement(object):
 
         self.remove_artist()
         self.artist = self.new_artist
-        self.artist.set_color(self.args['color'])
-        self.artist.set_linewidth(self.args['linewidth'])
-        self.ax.add_artist(self.artist)
+
+        if isinstance(self.artist, list):
+            for a in self.artist:
+                self.ax.add_artist(a)
+        else:
+            self.ax.add_artist(self.artist)
 
     def remove_artist(self):
         """
@@ -154,8 +169,12 @@ class DoElement(object):
 
         """
 
-        if self.artist:
-            self.artist.remove()
+        if self.artist is not None:
+            if isinstance(self.artist, list):
+                for a in self.artist:
+                    a.remove()
+            else:
+                self.artist.remove()
 
     def make_new_artist(self):
         """
@@ -168,3 +187,27 @@ class DoElement(object):
         """
 
         raise NotImplementedError
+
+    def init_fade(self):
+        """
+        Compute initial info necessary to implement fadein effect.
+
+        """
+
+        # During execution of this action, this factor will be multiplied by the current frame number to give the
+        # current alpha of the segment to be drawn
+        self.fade_factor = 1 / self.total_no_of_frames
+
+    def fadein(self, current_frame_in_part):
+
+        alpha = (current_frame_in_part + 1) * self.fade_factor
+        self.artist_kwargs['alpha'] = alpha
+
+        return self.make_new_artist()
+
+    def fadeout(self, current_frame_in_part):
+
+        alpha = 1 - (current_frame_in_part + 1) * self.fade_factor
+        self.artist_kwargs['alpha'] = alpha
+
+        return self.make_new_artist()

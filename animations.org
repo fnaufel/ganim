@@ -1,15 +1,5 @@
 
-* [9/14] Tasks
-
-*** TODO Write user guide in README.md
-    :LOGBOOK:
-    - State "TODO"       from              [2019-06-28 Fri 17:31]
-    :END:
-
-*** TODO Create DoVector class (subclass of DoLineSegment)
-    :LOGBOOK:
-    - State "TODO"       from              [2019-06-26 Wed 17:35]
-    :END:
+* [13/22] Tasks
 
 *** TODO Create DoPoint class
     :LOGBOOK:
@@ -21,12 +11,147 @@
     - State "TODO"       from              [2019-06-25 Tue 12:56]
     :END:
 
+*** TODO Create DoText class
+    :LOGBOOK:
+    - State "TODO"       from              [2019-06-28 Fri 18:27]
+    :END:
+
+*** TODO Create DoAngle class
+    :LOGBOOK:
+    - State "TODO"       from              [2019-09-16 Mon 17:39]
+    :END:
+
+*** TODO Write user guide in README.md
+    :LOGBOOK:
+    - State "TODO"       from              [2019-06-28 Fri 17:31]
+    :END:
+
+*** TODO Think about morphing actions
+    :LOGBOOK:
+    - State "TODO"       from              [2019-06-28 Fri 18:28]
+    :END:
+
+    + How to pass the starting artist to the action that will draw the
+      end artist?
+
+    + Probably the best way is to do that in the script!!!!
+
+    + Do that with text to test.
+
+*** TODO Create one big scene to use as regression test
+    :LOGBOOK:
+    - State "TODO"       from              [2019-06-28 Fri 18:31]
+    :END:
+
+    + Use text to organize the tests.
+
+*** STARTED Create DoVector class (subclass of DoLineSegment?)
+    :LOGBOOK:
+    - State "STARTED"    from "TODO"       [2019-07-03 Wed 21:04]
+    - State "TODO"       from              [2019-06-26 Wed 17:35]
+    :END:
+
+***** General
+
+      + 
+
+      + So far, from best to worst:
+
+***** Patch
+      :PROPERTIES:
+      :ORDERED:  t
+      :END:
+
+      + Do it. Use matplotlib.patches.Polygon
+
+      + Computations
+
+        [[/home/fnaufel/Documents/Development/00-Present/Animations/Matplotlib/Scripts/ganim/examples/arrow-calculations.jpg]]
+
+      + Example
+
+        [[/home/fnaufel/Documents/Development/00-Present/Animations/Matplotlib/Scripts/ganim/examples/arrow-geogebra.png]]
+
+      + Options and defaults
+
+        - Will linewidth be fixed or proportional to length?
+
+        - Head length = 0.2 of total length
+
+        - Head width = 0.15 of total length
+
+      + LATER: account for unequal aspect ratio of axes to ensure
+        perfectly triangular head
+
+***** Annotation
+
+      + Works even if aspect ratio of axes is not "equal".
+
+      + Must specify (tune these values)
+
+***** matplotlib.patches.FancyArrow
+
+      + If axes aspect is not 'equal', then the arrow head is
+        distorted.
+
+      + Make width proportional to length (with arg width)
+
+      + Make head width proportional to width (with arg head_width)
+
+***** matplotlib.patches.Arrow
+
+      + If axes aspect is not 'equal', then the arrow head is
+        distorted.
+
+      + Scales ok with Affine2d
+
+      + Size not easy to control: linewidth seems to have no effect,
+        width uses what units? But I don't want to use linewidth
+        (because I want the arrow to scale in width as it grows or
+        shrinks).
+
+      + Width must be calculated as a function of the length of the
+        vector, but tail width and head width change in the same
+        proportion.
+
 *** TODO Constants from manin: https://github.com/3b1b/manim/blob/master/docs/source/constants.rst
     :LOGBOOK:
     - State "TODO"       from              [2019-06-21 Fri 19:55]
     :END:
 
     + Use values for video quality etc.
+
+*** DONE Rewrite class template
+    CLOSED: [2019-09-16 Mon 18:31]
+    :LOGBOOK:
+    - State "DONE"       from "TODO"       [2019-09-16 Mon 18:31]
+    - State "TODO"       from              [2019-09-16 Mon 17:39]
+    :END:
+
+*** DONE Implement fade effects in DoElement class
+    CLOSED: [2019-07-03 Wed 19:57]
+    :LOGBOOK:
+    - State "DONE"       from "TODO"       [2019-07-03 Wed 19:57]
+    - State "TODO"       from              [2019-07-02 Tue 11:45]
+    :END:
+
+    + The code is almost always the same in the subclasses! Avoid repetition.
+
+*** DONE Allow self.artist to be a list
+    CLOSED: [2019-07-03 Wed 19:48]
+    :LOGBOOK:
+    - State "DONE"       from "TODO"       [2019-07-03 Wed 19:48]
+    - State "TODO"       from              [2019-06-30 Sun 20:39]
+    :END:
+
+    + Test before using, iterate if necessary
+
+*** DONE Implement fadein, fadeout and shrink effects for segments
+    CLOSED: [2019-06-30 Sun 15:32]
+    :LOGBOOK:
+    - State "DONE"       from "TODO"       [2019-06-30 Sun 15:32]
+    - State "TODO"       from              [2019-06-29 Sat 19:53]
+    :END:
 
 *** DONE Refactor: merge Action and CuedAction
     CLOSED: [2019-06-28 Fri 17:31]

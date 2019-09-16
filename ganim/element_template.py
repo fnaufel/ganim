@@ -2,6 +2,8 @@
 This file contains a template for a developer to implement a new animation action (i.e., a new element to be drawn)
 as a subclass of `ganim.elements.DoElement`.
 
+For a full implementation, see, e.g., class `ganim.line_elements.DoLineSegment`.
+
 """
 
 # Import necessary classes and functions (e.g., lines)
@@ -39,10 +41,11 @@ class DoNewElement(DoElement):
 
         """
 
-        # This command must be included: super() will store kwargs in self.args dictionary
+        # This command must be included: super() will store kwargs in the self.args dictionary and in the
+        # self.artist.kwargs dictionary
         super().__init__(*args, **kwargs)
 
-        # More initialization commands go here...
+        # TODO: add more initialization commands here
 
     def define_effects_dict(self):
         """
@@ -57,11 +60,20 @@ class DoNewElement(DoElement):
 
         """
 
-        self.effects = {
+        # Ask superclass to initialize effects dict
+        super().define_effects_dict()
+
+        # Create effects dict for this class
+        element_effects = {
             'None': {'init': None, 'run': self.show},
             'effect1': {'init': self.init_effect1, 'run': self.run_effect1}
-            # ...: ...
+            # TODO: add other effects:
+            # 'name': {'init': init_effect1, 'run': run_effect1},
+            # ...
         }
+
+        # Update dictionary of effects with the effects created above
+        self.effects.update(element_effects)
 
     def show(self, current_frame_in_part):
         """
@@ -71,14 +83,12 @@ class DoNewElement(DoElement):
 
         """
 
-        # Default transform
+        # Default transform (do nothing, just convert data coordinates to pixel coordinates)
         self.transform = self.ax.transData
 
         # If this method only draws the plain artist (the usual case), this is enough
         # The current_frame_in_part parameter value is not needed
-        new_artist = self.make_new_artist()
-
-        return new_artist
+        return self.make_new_artist()
 
     def init_effect1(self):
         """
@@ -95,14 +105,16 @@ class DoNewElement(DoElement):
 
         """
 
-        pass
+        # TODO: compute info that will be necessary for the effect. Save in instance fields
 
     def run_effect1(self, current_frame_in_part):
         """
         Apply this effect.
 
-        This will usually involve (1) creating a new artist, (2) computing a transformation based on the current
-        frame in part and on the desired effect, and (3) applying the transformation to the new artist.
+        This will usually involve (1) computing a transformation based on the current frame number in part and on the
+        desired effect, (2) assigning the transformation to self.artist_kwargs['transform'], (3) adding other
+        key-value pairs to the self.artist_kwargs dictionary, and (4) calling self.make_new_artist(),
+        returning whatever it returns.
 
         :param current_frame_in_part: number of the current frame with respect to beginning of part.
 
@@ -110,7 +122,14 @@ class DoNewElement(DoElement):
 
         """
 
-        pass
+        # TODO: compute values for this frame, based on current_frame_in_part and instance fields pertaining to this
+        #  effect
+
+        # TODO: compute transformation, usually using self.ax.transData
+        self.artist_kwargs['transform'] = None # TODO
+
+        # Build and return new artist for this frame
+        return self.make_new_artist()
 
     def make_new_artist(self):
         """
@@ -118,13 +137,15 @@ class DoNewElement(DoElement):
 
         Usually, this will mean creating a new artist and applying a transformation to it, based on the chosen effect.
 
-        :return: new artist to be drawn.
+        Sometimes, the element to be drawn will consist of a *list* of artists.
+
+        :return: new artist --- or list of artists --- to be drawn.
 
         """
 
-        new_artist = ''  # implement creation of new artist
-
-        return new_artist
+        return None
+        # TODO: create and return artist --- or list of artists --- to be drawn on this frame. Will use instance fields
+        #  and possibly **self.artist_kwargs
 
     def draw_element(self):
         """
@@ -137,9 +158,12 @@ class DoNewElement(DoElement):
         self.remove_artist()
         self.artist = self.new_artist
 
-        # More visual configuration can be applied below, if necessary
+        # TODO: apply more visual configuration, if necessary
         self.artist.set_color(self.args['color'])
         self.artist.set_linewidth(self.args['linewidth'])
 
-        # A specialized add method (e.g., add_line) may be used below instead of add_artist
+        # TODO: if, instead of a single artist, a *list* of artists must be drawn on the frame, then self.artist will
+        #  be a list. In this case, you must loop through the list and add the artists to the ax one by one.
+        #  Also, a specialized add method (e.g., add_line) may be used below instead of add_artist
+
         self.ax.add_artist(self.artist)
