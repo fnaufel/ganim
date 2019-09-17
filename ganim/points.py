@@ -3,7 +3,7 @@ Points.
 """
 
 # Import transformations
-from matplotlib.transforms import Affine2D
+from matplotlib.lines import Line2D
 
 from ganim.elements import DoElement
 
@@ -75,9 +75,6 @@ class DoPoint(DoElement):
 
         """
 
-        # Default transform (do nothing, just convert data coordinates to pixel coordinates)
-        self.transform = self.ax.transData
-
         # If this method only draws the plain artist (the usual case), this is enough
         # The current_frame_in_part parameter value is not needed
         return self.make_new_artist()
@@ -94,11 +91,13 @@ class DoPoint(DoElement):
 
         """
 
-        # TODO: use a marker here. Create a line2d instance? Set color, size and shape here?
+        new_point = Line2D(
+                [self.x0],
+                [self.y0],
+                **self.artist_kwargs
+        )
 
-        return None
-        # TODO: create and return artist --- or list of artists --- to be drawn on this frame. Will use instance fields
-        #  and possibly **self.artist_kwargs
+        return new_point
 
     def draw_element(self):
         """
@@ -111,6 +110,4 @@ class DoPoint(DoElement):
         self.remove_artist()
         self.artist = self.new_artist
 
-        # TODO: a specialized add method (e.g., add_line) may be used below instead of add_artist
-
-        self.ax.add_artist(self.artist)
+        self.ax.add_line(self.artist)

@@ -1,30 +1,77 @@
 
-* [13/22] Tasks
+* [14/24] Tasks
 
-*** STARTED Create DoPoint class
+*** STARTED Create DoAngle class
     :LOGBOOK:
-    - State "STARTED"    from "TODO"       [2019-09-16 Mon 20:17]
-    - State "TODO"       from              [2019-06-23 Sun 19:36]
+    - State "STARTED"    from "TODO"       [2019-09-17 Tue 18:01]
+    - State "TODO"       from              [2019-09-16 Mon 17:39]
     :END:
 
-    + Test whether creating a Line2D instance with a single marker is ok.
+    + Inputs
 
-    + This will allow all kinds of shapes and fill options for the
-      point (i.e., actually a marker) to be drawn.
+      - 2 line segments. Later, allow us to get 2 sides from a polygon
+        somehow.
 
-*** TODO Create DoCircle class
-    :LOGBOOK:
-    - State "TODO"       from              [2019-06-25 Tue 12:56]
-    :END:
+      - radius
+
+    + Use matplotlib.patches.Arc?
+
+      + Or Wedge?
+
+      + See file:///home/fnaufel/.local/share/zeal/docsets/Matplotlib.docset/Contents/Resources/Documents/matplotlib.org/3.1.1/gallery/shapes_and_collections/artist_reference.html#sphx-glr-gallery-shapes-and-collections-artist-reference-py 
+
+      + See also file:///home/fnaufel/.local/share/zeal/docsets/Matplotlib.docset/Contents/Resources/Documents/matplotlib.org/3.1.1/_downloads/e52a9a2c83ddd28d71a9a9803e9ffb6b/patch_collection.py
+
+      + Cannot be filled? It seems that a PatchCollection can have a
+        fill color. Check above.
+
+      + Algorithm
+
+        1. Compute intersection point between segments: (xv, yv). This
+           will be the center of the ellipse.
+
+        2. Compute angles of each segment wrt x axis: theta1, theta2.
+
+        3. Call 
+
+           #+begin_src python
+               patches.Arc(
+                   (xv, yv),
+                   radius,
+                   radius,
+                   angle=0,
+                   theta1,
+                   theta2
+               )
+           #+end_src
+
+    + Or use matplotlib.path.Path?
+
+      - Can it be filled?
+
+      - See classmethod arc(theta1, theta2, n=None, is_wedge=False).
+        Returns an arc of the unit circle! Can I scale it?
+
+      - Algorithm?
 
 *** TODO Create DoText class
     :LOGBOOK:
     - State "TODO"       from              [2019-06-28 Fri 18:27]
     :END:
 
-*** TODO Create DoAngle class
+*** TODO Add label argument to existing classes?
     :LOGBOOK:
-    - State "TODO"       from              [2019-09-16 Mon 17:39]
+    - State "TODO"       from              [2019-09-17 Tue 16:53]
+    :END:
+
+*** TODO Create DoPolygon class
+    :LOGBOOK:
+    - State "TODO"       from              [2019-09-17 Tue 16:53]
+    :END:
+
+*** TODO Create DoCircle class
+    :LOGBOOK:
+    - State "TODO"       from              [2019-06-25 Tue 12:56]
     :END:
 
 *** TODO Write user guide in README.md
@@ -126,6 +173,19 @@
     :END:
 
     + Use values for video quality etc.
+
+*** DONE Create DoPoint class
+    CLOSED: [2019-09-17 Tue 16:52]
+    :LOGBOOK:
+    - State "DONE"       from "STARTED"    [2019-09-17 Tue 16:52]
+    - State "STARTED"    from "TODO"       [2019-09-16 Mon 20:17]
+    - State "TODO"       from              [2019-06-23 Sun 19:36]
+    :END:
+
+    + Test whether creating a Line2D instance with a single marker is ok.
+
+    + This will allow all kinds of shapes and fill options for the
+      point (i.e., actually a marker) to be drawn.
 
 *** DONE Rewrite class template
     CLOSED: [2019-09-16 Mon 18:31]

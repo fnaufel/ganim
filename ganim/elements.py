@@ -70,9 +70,10 @@ class DoElement(object):
 
         # Default kwargs used in drawing the artist
         self.artist_kwargs = {
-            'linewidth': 2.0,  # for lines
             'color': 'w',
-            'markersize': 2.0  # for points
+            'linewidth': 2.0,  # for lines and polygons
+            'markersize': 4.0,  # for points
+            'marker': 'o',  # for points
         }
 
         # If different values were specified in the call to the constructor, update:
