@@ -1,5 +1,5 @@
 """
-Actions involving lines: segments, vectors etc
+Actions involving lines: segments, vectors etc.
 """
 
 from matplotlib import lines

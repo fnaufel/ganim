@@ -1,5 +1,5 @@
 
-* [14/24] Tasks
+* [14/25] Tasks
 
 *** STARTED Create DoAngle class
     :LOGBOOK:
@@ -14,9 +14,22 @@
 
       - radius
 
-    + Use matplotlib.patches.Arc?
+      - label?
 
-      + Or Wedge?
+    + Use matplotlib.patches.Wedge? YES
+
+    + Algorithm
+
+      1. Find intersection point (x, y) between segments. If parallel
+         or coincident, error.
+
+      2. Find angle t1 of first segment
+
+      3. Find angle t2 of second segment
+
+      4. Draw wedge
+
+    + Use matplotlib.patches.Arc? No.
 
       + See file:///home/fnaufel/.local/share/zeal/docsets/Matplotlib.docset/Contents/Resources/Documents/matplotlib.org/3.1.1/gallery/shapes_and_collections/artist_reference.html#sphx-glr-gallery-shapes-and-collections-artist-reference-py 
 
@@ -45,7 +58,7 @@
                )
            #+end_src
 
-    + Or use matplotlib.path.Path?
+    + Or use matplotlib.path.Path? No.
 
       - Can it be filled?
 
@@ -53,6 +66,13 @@
         Returns an arc of the unit circle! Can I scale it?
 
       - Algorithm?
+
+*** TODO Create DoPoly class
+    :LOGBOOK:
+    - State "TODO"       from              [2019-09-24 Tue 16:05]
+    :END:
+
+    + Sides will be segments
 
 *** TODO Create DoText class
     :LOGBOOK:
