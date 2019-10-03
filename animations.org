@@ -1,5 +1,42 @@
 
-* [14/25] Tasks
+* [14/26] Tasks
+
+*** TODO Fix fadein and fadeout effects
+    :LOGBOOK:
+    - State "TODO"       from              [2019-10-03 Thu 18:45]
+    :END:
+
+***** Consider edgecolor and facecolor instead of alpha when appropriate
+
+      + Angle, Polygon, etc.
+
+*** STARTED Create DoPolygon class
+    :LOGBOOK:
+    - State "STARTED"    from "TODO"       [2019-10-03 Thu 18:44]
+    - State "TODO"       from              [2019-09-24 Tue 16:05]
+    :END:
+
+***** TODO See TODO tags in source
+      :LOGBOOK:
+      - State "TODO"       from              [2019-10-03 Thu 18:48]
+      :END:
+
+***** DONE Alpha of fill?
+      CLOSED: [2019-10-03 Thu 18:48]
+      :LOGBOOK:
+      - State "DONE"       from              [2019-10-03 Thu 18:48]
+      :END:
+
+      + Can it be set independently from the alpha of edges?
+
+      + Yes, use rgba:
+
+        - an RGB or RGBA (red, green, blue, alpha) tuple of float
+          values in [0, 1] (e.g., (0.1, 0.2, 0.5) or (0.1, 0.2, 0.5,
+          0.3));
+
+        - a hex RGB or RGBA string (e.g., '#0f0f0f' or '#0f0f0f80';
+          case-insensitive);
 
 *** STARTED Create DoAngle class
     :LOGBOOK:
@@ -7,46 +44,63 @@
     - State "TODO"       from              [2019-09-16 Mon 17:39]
     :END:
 
-    + Inputs
+***** TODO Add label
+      :LOGBOOK:
+      - State "TODO"       from              [2019-10-03 Thu 14:39]
+      :END:
 
-      - 2 line segments. Later, allow us to get 2 sides from a polygon
+***** TODO Compute intersection of segments?
+      :LOGBOOK:
+      - State "TODO"       from              [2019-10-03 Thu 14:39]
+      :END:
+
+***** DONE Draw square if right angle (90 or -90)
+      CLOSED: [2019-10-03 Thu 14:39]
+      :LOGBOOK:
+      - State "DONE"       from              [2019-10-03 Thu 14:39]
+      :END:
+
+***** Inputs
+
+      + 2 line segments. Later, allow us to get 2 sides from a polygon
         somehow.
 
-      - radius
+      + Center of angle
 
-      - label?
+      + Radius
 
-    + Use matplotlib.patches.Wedge? YES
+      + Label?
 
-    + Algorithm
+***** Algorithm
 
-      1. Find intersection point (x, y) between segments. If parallel
-         or coincident, error.
+      1. Find angle t1 of first segment wrt Ox
 
-      2. Find angle t1 of first segment
+      2. Find angle t2 of second segment wrt Ox
 
-      3. Find angle t2 of second segment
+      3. Draw wedge
 
-      4. Draw wedge
+***** Use matplotlib.patches.Wedge? YES
 
-    + Use matplotlib.patches.Arc? No.
+***** Misc
+
+      + Use matplotlib.patches.Arc? No.
 
       + See file:///home/fnaufel/.local/share/zeal/docsets/Matplotlib.docset/Contents/Resources/Documents/matplotlib.org/3.1.1/gallery/shapes_and_collections/artist_reference.html#sphx-glr-gallery-shapes-and-collections-artist-reference-py 
-
+   
       + See also file:///home/fnaufel/.local/share/zeal/docsets/Matplotlib.docset/Contents/Resources/Documents/matplotlib.org/3.1.1/_downloads/e52a9a2c83ddd28d71a9a9803e9ffb6b/patch_collection.py
-
+   
       + Cannot be filled? It seems that a PatchCollection can have a
         fill color. Check above.
-
+   
       + Algorithm
-
+   
         1. Compute intersection point between segments: (xv, yv). This
            will be the center of the ellipse.
-
+   
         2. Compute angles of each segment wrt x axis: theta1, theta2.
-
+   
         3. Call 
-
+   
            #+begin_src python
                patches.Arc(
                    (xv, yv),
@@ -57,22 +111,15 @@
                    theta2
                )
            #+end_src
-
-    + Or use matplotlib.path.Path? No.
-
-      - Can it be filled?
-
-      - See classmethod arc(theta1, theta2, n=None, is_wedge=False).
-        Returns an arc of the unit circle! Can I scale it?
-
-      - Algorithm?
-
-*** TODO Create DoPoly class
-    :LOGBOOK:
-    - State "TODO"       from              [2019-09-24 Tue 16:05]
-    :END:
-
-    + Sides will be segments
+   
+      + Or use matplotlib.path.Path? No.
+       
+        - Can it be filled?
+       
+        - See classmethod arc(theta1, theta2, n=None, is_wedge=False).
+          Returns an arc of the unit circle! Can I scale it?
+       
+        - Algorithm?
 
 *** TODO Create DoText class
     :LOGBOOK:
@@ -84,10 +131,12 @@
     - State "TODO"       from              [2019-09-17 Tue 16:53]
     :END:
 
-*** TODO Create DoPolygon class
+*** TODO Create DoRotation class
     :LOGBOOK:
-    - State "TODO"       from              [2019-09-17 Tue 16:53]
+    - State "TODO"       from              [2019-10-03 Thu 18:46]
     :END:
+
+*** TODO Create DoGroup class
 
 *** TODO Create DoCircle class
     :LOGBOOK:

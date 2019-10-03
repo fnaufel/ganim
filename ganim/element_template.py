@@ -41,6 +41,12 @@ class DoNewElement(DoElement):
 
         """
 
+        # TODO: add default artist properties for this element
+        self.default_artist_kwargs = {
+            'color': 'w',
+            'linewidth': 2.0,
+        }
+
         # This command must be included: super() will store kwargs in the self.args dictionary and in the
         # self.artist.kwargs dictionary
         super().__init__(*args, **kwargs)

@@ -68,16 +68,12 @@ class DoElement(object):
         # Artist (or list of artists) being constructed, to be drawn in the next frame
         self.new_artist = None
 
-        # Default kwargs used in drawing the artist
-        self.artist_kwargs = {
-            'color': 'w',
-            'alpha': 1.0,
-            'linewidth': 2.0,  # for lines and polygons
-            'markersize': 4.0,  # for points
-            'marker': 'o',  # for points
-            'facecolor': 'yellow',  # for angles and polygons
-            'edgecolor': 'w',  # for angles and polygons
-        }
+        # Default kwargs used in drawing any artist
+        self.artist_kwargs = {}
+
+        # Add default artist kwargs for specific artist implemented by subclass
+        # (default_artist_kwargs is created by subclass before subclass calls this constructor)
+        self.artist_kwargs.update(self.default_artist_kwargs)
 
         # If different values were specified in the call to the constructor, update:
         self.artist_kwargs.update(
@@ -205,12 +201,18 @@ class DoElement(object):
 
     def fadein(self, current_frame_in_part):
 
+        # TODO: some elements -- angles, polygons -- have facecolor and edgecolor, with their respective alphas! Deal
+        #  with this. In this case, include alpha info into edgecolor and facecolor. See DoPolygon.
+
         alpha = (current_frame_in_part + 1) * self.fade_factor
         self.artist_kwargs['alpha'] = alpha
 
         return self.make_new_artist()
 
     def fadeout(self, current_frame_in_part):
+
+        # TODO: some elements -- angles, polygons -- have facecolor and edgecolor, with their respective alphas! Deal
+        #  with this. In this case, include alpha info into edgecolor and facecolor. See DoPolygon.
 
         alpha = 1 - (current_frame_in_part + 1) * self.fade_factor
         self.artist_kwargs['alpha'] = alpha

@@ -2,12 +2,12 @@
 Angles.
 """
 
-# Import necessary classes and functions (e.g., lines)
-from matplotlib import lines
-from matplotlib.patches import Wedge
+import numpy as np
+from matplotlib.colors import to_rgba
+from matplotlib.patches import Wedge, Polygon
+from matplotlib.transforms import Affine2D
 
 from ganim.elements import DoElement
-from ganim.util import segment_intersection
 
 
 class DoAngle(DoElement):
@@ -15,12 +15,16 @@ class DoAngle(DoElement):
     Class to draw an angle.
 
     * **Positional arguments:**
+    
+        * `center`: tuple (x0, y0), center of angle
 
         * `seg1`: a line segment, instance of DoLineSegment
 
         * `seg2`: a line segment, instance of DoLineSegment
 
     * **Keyword arguments:**
+
+        * `center`: (if not specified as a positional arg)
 
         * `seg1`: (if not specified as a positional arg)
 
@@ -34,7 +38,9 @@ class DoAngle(DoElement):
 
         * `facecolor`
 
-        * `alpha`
+        * `edgealpha`: default: 1.0.
+
+        * `facealpha`: default: 0.5.
 
         * `linewidth`
 
@@ -42,30 +48,55 @@ class DoAngle(DoElement):
 
     def __init__(self, *args, **kwargs):
 
+        # Default properties of angles
+        self.default_artist_kwargs = {
+            'facecolor': 'yellow',
+            'edgecolor': 'w',
+            'edgealpha': 1.0,
+            'facealpha': 0.1,
+            'linewidth': 2.0,
+        }
+
         # super() will store kwargs in the self.args dictionary and in the
         # self.artist.kwargs dictionary
         super().__init__(*args, **kwargs)
 
-        if len(args) == 2:
-            self.seg1, self.seg2 = args[0:2]
-        else:
-            self.seg1 = self.args['seg1']
-            self.seg2 = self.args['seg2']
+        # Adjust alpha of line
+        self.artist_kwargs['edgecolor'] = to_rgba(
+                self.artist_kwargs['edgecolor'],
+                float(self.artist_kwargs['edgealpha'])
+        )
 
-        # Remove color property from kwargs (for angles, it overrides edgecolor and facecolor)
-        del self.artist_kwargs['color']
+        # Adjust alpha of interior
+        self.artist_kwargs['facecolor'] = to_rgba(
+                self.artist_kwargs['facecolor'],
+                float(self.artist_kwargs['facealpha'])
+        )
+
+        # Remove keys that matplotlib's Wedge artist does not understand
+        del self.artist_kwargs['edgealpha'], self.artist_kwargs['facealpha']
+
+        # Process args
+        padded_args = args + (None, None, None)
+        self.center, self.seg1, self.seg2 = padded_args[0:3]
+
+        if self.center is None:
+            self.center = self.args['center']
+
+        if self.seg1 is None:
+            self.seg1 = self.args['seg1']
+
+        if self.seg2 is None:
+            self.seg2 = self.args['seg2']
 
         # Default radius
         self.radius = 1.0
+        if 'radius' in kwargs.keys():
+            self.radius = kwargs['radius']
 
-        # Compute intersection point of segments (error if segments don't touch)
-        self.center = segment_intersection(self.seg1, self.seg2)
-        if self.center is None:
-            raise ValueError('Segments do not intercept at an angle.')
-
-    # TODO: continue
-
-
+        # Get angles of segments wrt x axis
+        self.theta1 = self.seg1.angle()
+        self.theta2 = self.seg2.angle()
 
     def define_effects_dict(self):
         """
@@ -117,31 +148,48 @@ class DoAngle(DoElement):
 
         """
 
-        return Wedge(
-                self.center,
-                self.radius,
-                self.seg1_inclination,
-                self.seg2_inclination,
-                **self.artist_kwargs
-        )
-
-    def draw_element(self):
-        """
-        Remove previous form of the element, draw current form of the element, and update self.artist.
-
-        The following implementation will usually be enough.
-
-        If you don't need to change anything in this implementation, you may safely delete this method, as this is
-        precisely the code the superclass implements for it.
-
-        """
-
-        self.remove_artist()
-        self.artist = self.new_artist
-
-        #  TODO: a specialized add method (e.g., add_line) may be used below instead of add_artist
-        if isinstance(self.artist, list):
-            for a in self.artist:
-                self.ax.add_artist(a)
+        if self.is_right_angle(self.theta1, self.theta2):
+            # Right angle: draw square of side radius/2, rotated according to the segments' position
+            vertices = np.array(
+                    [
+                        self.center,
+                        (self.center[0] + self.radius / 2, self.center[1]),
+                        (self.center[0] + self.radius / 2, self.center[1] + self.radius / 2),
+                        (self.center[0], self.center[1] + self.radius / 2),
+                    ]
+            )
+            return Polygon(
+                    vertices,
+                    closed=True,
+                    fill=True,
+                    transform=Affine2D().rotate_deg_around(*self.center, self.theta1) +
+                              self.ax.transData,
+                    **self.artist_kwargs
+            )
         else:
-            self.ax.add_artist(self.artist)
+            # Not right angle: draw wedge
+            return Wedge(
+                    self.center,
+                    self.radius,
+                    self.theta1,
+                    self.theta2,
+                    **self.artist_kwargs
+            )
+
+    @staticmethod
+    def is_right_angle(theta1, theta2):
+        """
+        Check if the difference from theta1 to theta2 is 90 degrees.
+
+        :param theta1: angle of first segment wrt to x axis (in degrees).
+
+        :param theta2: angle of second segment wrt to x axis (in degrees).
+
+        :return: True iff theta2 - theta1 == 90, accounting for the possibility that theta1 is in quadrant 4.
+
+        """
+
+        if theta1 < 270:
+            return theta2 == theta1 + 90.0
+        else:
+            return theta2 == theta1 + 90.0 - 360.0

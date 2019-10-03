@@ -36,4 +36,4 @@ s1.add_part(
 print(f'Rendering scene s1:\n{s1}...')
 s1.render()
 print('Saving...')
-s1.save('segments09-fade.mp4')
+s1.save('09-fade.mp4')

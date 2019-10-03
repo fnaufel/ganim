@@ -32,6 +32,13 @@ class DoPoint(DoElement):
 
         """
 
+        # Add default properties to artist
+        self.default_artist_kwargs = {
+            'color': 'w',
+            'markersize': 4.0,
+            'marker': 'o',
+        }
+
         # This command must be included: super() will store kwargs in the self.args dictionary and in the
         # self.artist.kwargs dictionary
         super().__init__(*args, **kwargs)

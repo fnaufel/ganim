@@ -15,4 +15,4 @@ s1.add_part(
 print(f'Rendering scene s1:\n{s1}...')
 s1.render()
 print('Saving...')
-s1.save('segments11-vectors.mp4')
+s1.save('11-vectors.mp4')

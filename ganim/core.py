@@ -16,10 +16,10 @@ FPS_DEFAULT = 60
 INTERVAL_DEFAULT = 1000 / FPS_DEFAULT
 
 # Limits for x axis (in data coords)
-XLIM_DEFAULT = (-1, 5)
+XLIM_DEFAULT = (-1, 17)
 
 # Limits for y axis (in data coords)
-YLIM_DEFAULT = (-1, 5)
+YLIM_DEFAULT = (-1, 10)
 
 # Global variables #######################################################
 
@@ -73,7 +73,7 @@ def reset_default_style():
         'figure.dpi': 200,
         'figure.edgecolor': 'k',
         'figure.facecolor': 'k',
-        'figure.figsize': [12.8, 7.15],
+        'figure.figsize': [16, 9],
         'font.family': ['serif'],
         'font.serif': ['Computer Modern Roman'],
         'patch.edgecolor': 'white',

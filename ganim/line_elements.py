@@ -1,6 +1,7 @@
 """
 Actions involving lines: segments, vectors etc.
 """
+from math import degrees, atan2
 
 from matplotlib import lines
 from matplotlib.transforms import Affine2D
@@ -34,7 +35,14 @@ class DoLineSegment(DoElement):
 
     def __init__(self, *args, **kwargs):
 
-        # super() will store kwargs in self.args dictionary
+        # Default artist properties for line segment
+        self.default_artist_kwargs = {
+            'color': 'w',
+            'linewidth': 2.0,
+            'alpha': 1.0,
+        }
+
+        # super() will store appropriate values in self.args and self.artist_kwargs dictionaries
         super().__init__(**kwargs)
 
         if len(args) == 2:
@@ -119,8 +127,8 @@ class DoLineSegment(DoElement):
 
         scale = (current_frame_in_part + 1) * self.grow_factor
         self.artist_kwargs['transform'] = Affine2D().scale(scale) + \
-                    Affine2D().translate(self.xa * (1 - scale), self.ya * (1 - scale)) + \
-                    self.ax.transData
+            Affine2D().translate(self.xa * (1 - scale), self.ya * (1 - scale)) + \
+            self.ax.transData
 
         return self.make_new_artist()
 
@@ -135,7 +143,37 @@ class DoLineSegment(DoElement):
 
         scale = 1 - (current_frame_in_part + 1) * self.grow_factor
         self.artist_kwargs['transform'] = Affine2D().scale(scale) + \
-                    Affine2D().translate(self.xa * (1 - scale), self.ya * (1 - scale)) + \
-                    self.ax.transData
+            Affine2D().translate(self.xa * (1 - scale), self.ya * (1 - scale)) + \
+            self.ax.transData
 
         return self.make_new_artist()
+
+    def angle(self):
+        """
+        Return angle (in degrees) of this segment wrt to x axis.
+
+        TODO: if this segment is ever rotated, change this method accordingly
+
+        :return: angle measured counterclockwise, in degrees, as float, in interval [0.0; 360.0).
+
+        """
+
+        # Vertical segment
+        if self.xa == self.xb:
+            if self.ya < self.yb:
+                return 90.0
+            else:
+                return 270.0
+
+        # Nonvertical segment
+        angle = degrees(
+                atan2(
+                        self.yb - self.ya,
+                        self.xb - self.xa
+                )
+        )
+
+        if angle < 0:
+            angle = 360.0 + angle
+
+        return angle
