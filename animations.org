@@ -1,42 +1,5 @@
 
-* [14/26] Tasks
-
-*** TODO Fix fadein and fadeout effects
-    :LOGBOOK:
-    - State "TODO"       from              [2019-10-03 Thu 18:45]
-    :END:
-
-***** Consider edgecolor and facecolor instead of alpha when appropriate
-
-      + Angle, Polygon, etc.
-
-*** STARTED Create DoPolygon class
-    :LOGBOOK:
-    - State "STARTED"    from "TODO"       [2019-10-03 Thu 18:44]
-    - State "TODO"       from              [2019-09-24 Tue 16:05]
-    :END:
-
-***** TODO See TODO tags in source
-      :LOGBOOK:
-      - State "TODO"       from              [2019-10-03 Thu 18:48]
-      :END:
-
-***** DONE Alpha of fill?
-      CLOSED: [2019-10-03 Thu 18:48]
-      :LOGBOOK:
-      - State "DONE"       from              [2019-10-03 Thu 18:48]
-      :END:
-
-      + Can it be set independently from the alpha of edges?
-
-      + Yes, use rgba:
-
-        - an RGB or RGBA (red, green, blue, alpha) tuple of float
-          values in [0, 1] (e.g., (0.1, 0.2, 0.5) or (0.1, 0.2, 0.5,
-          0.3));
-
-        - a hex RGB or RGBA string (e.g., '#0f0f0f' or '#0f0f0f80';
-          case-insensitive);
+* [14/27] Tasks
 
 *** STARTED Create DoAngle class
     :LOGBOOK:
@@ -126,17 +89,54 @@
     - State "TODO"       from              [2019-06-28 Fri 18:27]
     :END:
 
+*** STARTED Create DoPolygon class
+    :LOGBOOK:
+    - State "STARTED"    from "TODO"       [2019-10-03 Thu 18:44]
+    - State "TODO"       from              [2019-09-24 Tue 16:05]
+    :END:
+
+***** TODO See TODO tags in source
+      :LOGBOOK:
+      - State "TODO"       from              [2019-10-03 Thu 18:48]
+      :END:
+
+***** DONE Alpha of fill?
+      CLOSED: [2019-10-03 Thu 18:48]
+      :LOGBOOK:
+      - State "DONE"       from              [2019-10-03 Thu 18:48]
+      :END:
+
+      + Can it be set independently from the alpha of edges?
+
+      + Yes, use rgba:
+
+        - an RGB or RGBA (red, green, blue, alpha) tuple of float
+          values in [0, 1] (e.g., (0.1, 0.2, 0.5) or (0.1, 0.2, 0.5,
+          0.3));
+
+        - a hex RGB or RGBA string (e.g., '#0f0f0f' or '#0f0f0f80';
+          case-insensitive);
+
 *** TODO Add label argument to existing classes?
     :LOGBOOK:
     - State "TODO"       from              [2019-09-17 Tue 16:53]
     :END:
+
+*** TODO Create DoGroup class
 
 *** TODO Create DoRotation class
     :LOGBOOK:
     - State "TODO"       from              [2019-10-03 Thu 18:46]
     :END:
 
-*** TODO Create DoGroup class
+*** TODO Fix fadein and fadeout effects
+    :LOGBOOK:
+    - State "TODO"       from              [2019-10-03 Thu 18:45]
+    :END:
+
+***** Consider edgecolor and facecolor instead of alpha when appropriate
+
+      + Angle, Polygon, etc.
 
 *** TODO Create DoCircle class
     :LOGBOOK:
@@ -167,8 +167,9 @@
 
     + Use text to organize the tests.
 
-*** STARTED Create DoVector class (subclass of DoLineSegment?)
+*** TODO Create DoVector class (subclass of DoLineSegment?)
     :LOGBOOK:
+    - State "TODO"       from "STARTED"    [2019-10-09 Wed 16:28]
     - State "STARTED"    from "TODO"       [2019-07-03 Wed 21:04]
     - State "TODO"       from              [2019-06-26 Wed 17:35]
     :END:

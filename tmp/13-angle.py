@@ -20,8 +20,8 @@ s1.add_part(
 s1.add_part(
     duration=3,
     script=[
-        DoAngle((0, 0), seg1, seg2, effect='fadein'),
-        DoAngle((0, 0), seg2, seg1, effect='fadein', facecolor='green')
+        DoAngle((0, 0), seg1, seg2, effect='fadein', label=r'$\alpha$'),
+#        DoAngle((0, 0), seg2, seg1, effect='fadein', facecolor='green')
     ]
 )
 

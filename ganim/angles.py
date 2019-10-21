@@ -1,10 +1,12 @@
 """
 Angles.
 """
+from math import cos, radians, sin
 
 import numpy as np
 from matplotlib.colors import to_rgba
 from matplotlib.patches import Wedge, Polygon
+from matplotlib.text import Text
 from matplotlib.transforms import Affine2D
 
 from ganim.elements import DoElement
@@ -43,6 +45,10 @@ class DoAngle(DoElement):
         * `facealpha`: default: 0.5.
 
         * `linewidth`
+
+        * `label`: default: None
+
+        * `labelcolor`: default: 'w'
 
     """
 
@@ -94,9 +100,26 @@ class DoAngle(DoElement):
         if 'radius' in kwargs.keys():
             self.radius = kwargs['radius']
 
-        # Get angles of segments wrt x axis
+        # Get angles of segments wrt x axis (in degrees)
         self.theta1 = self.seg1.angle()
         self.theta2 = self.seg2.angle()
+
+        # Compute angle betwn segments
+        # TODO: check
+        self.angle = self.theta2 - self.theta1
+
+        # Label, label position and label color
+        self.label = None
+        if 'label' in kwargs.keys():
+            self.label = kwargs['label']
+            self.x_label, self.y_label = self.label_position()
+            if 'labelcolor' in kwargs.keys():
+                self.labelcolor = kwargs['labelcolor']
+            else:
+                self.labelcolor = 'w'
+
+        # TODO: allow caller to specify label position
+
 
     def define_effects_dict(self):
         """
@@ -148,6 +171,8 @@ class DoAngle(DoElement):
 
         """
 
+        retval = []
+
         if self.is_right_angle(self.theta1, self.theta2):
             # Right angle: draw square of side radius/2, rotated according to the segments' position
             vertices = np.array(
@@ -158,23 +183,41 @@ class DoAngle(DoElement):
                         (self.center[0], self.center[1] + self.radius / 2),
                     ]
             )
-            return Polygon(
+            retval.append(
+                Polygon(
                     vertices,
                     closed=True,
                     fill=True,
                     transform=Affine2D().rotate_deg_around(*self.center, self.theta1) +
                               self.ax.transData,
                     **self.artist_kwargs
+                )
             )
         else:
             # Not right angle: draw wedge
-            return Wedge(
+            retval.append(
+                Wedge(
                     self.center,
                     self.radius,
                     self.theta1,
                     self.theta2,
                     **self.artist_kwargs
+                )
             )
+
+        if self.label is not None:
+            retval.append(
+                Text(
+                        x=self.x_label,
+                        y=self.y_label,
+                        text=self.label,
+                        color=self.labelcolor,
+                        usetex=True,
+                        fontsize=30  # TODO
+                )
+            )
+
+        return retval
 
     @staticmethod
     def is_right_angle(theta1, theta2):
@@ -193,3 +236,13 @@ class DoAngle(DoElement):
             return theta2 == theta1 + 90.0
         else:
             return theta2 == theta1 + 90.0 - 360.0
+
+    def label_position(self):
+
+        rho = 1.2 * self.radius
+        angle = radians(self.theta1 + self.angle / 2)
+
+        x = self.center[0] + rho * cos(angle)
+        y = self.center[1] + rho * sin(angle)
+
+        return x, y

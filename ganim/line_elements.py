@@ -31,6 +31,8 @@ class DoLineSegment(DoElement):
 
         * `linewidth`
 
+        * `linestyle`
+
     """
 
     def __init__(self, *args, **kwargs):
@@ -39,6 +41,7 @@ class DoLineSegment(DoElement):
         self.default_artist_kwargs = {
             'color': 'w',
             'linewidth': 2.0,
+            'linestyle': 'solid',
             'alpha': 1.0,
         }
 
